@@ -64,3 +64,34 @@ class DQNAgent:
 
     def save(self, name):
         self.model.save_weights(name)
+
+
+class DDQNAgent(DQNAgent):
+    def __init__(self, config):
+        super(DDQNAgent, self).__init__(config)
+
+    # override
+    def replay(self):
+        minibatch = random.sample(self.memory, self.batch_size)
+        for state, action, reward, next_state in minibatch:
+            # compute target value, this is the key point of Double DQN
+            
+            # target
+            target_f = self.model.predict(state)
+
+            # choose best action for next state using current Q network
+            actions_for_next_state = np.argmax(self.model.predict(next_state)[0])
+            
+            # compute target value
+            target = (reward + self.gamma *
+                      self.target_model.predict(next_state)[0][actions_for_next_state] )
+            
+            target_f[0][action] = target
+
+            self.model.fit(state, target_f, epochs=1, verbose=0) # train on single sample
+        
+        if self.epsilon > self.epsilon_min:
+            self.epsilon = self.epsilon_decay
+
+    
+

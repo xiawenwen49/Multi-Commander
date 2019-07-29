@@ -16,7 +16,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default='config/global_config.json')
     parser.add_argument('--num_step', type=int, default=10**3)
-    parser.add_argument('--chpt', type=str)
+    parser.add_argument('--ckpt', type=str)
 
     args = parser.parse_args()
 
@@ -43,7 +43,7 @@ def main():
     agent = DQNAgent(config)
     
     # inference
-    agent.load(args.chpt)
+    agent.load(args.ckpt)
     env.reset()
     state = env.get_state()
     state = np.array(list(state['start_lane_vehicle_count'].values()) + [state['current_phase']] )
