@@ -1,6 +1,7 @@
 # Multi-Commander
 Multi-agent signal control
-DQN implementation
+
+Implementation of DQN, and it's variants
 
 ### usage
 training
