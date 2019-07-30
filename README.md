@@ -8,15 +8,15 @@ Implementation of DQN, Double DQN and Dueling DQN
 
 *DQN*
 ```
-python run_rl_control.py
+python run_rl_control.py --algo DQN --epoch 10
 ```
 *Double DQN*
 ```
-python run_rl_control.py --algo DDQN --epoch 10 # double DQN
+python run_rl_control.py --algo DDQN --epoch 10 
 ```
 *Dueling DQN*
 ```
-python run_rl_control.py --algo DuelDQN --epoch 1
+python run_rl_control.py --algo DuelDQN --epoch 10
 ```
 
 **Inference**
@@ -32,8 +32,7 @@ python run_rl_control.py --algo DDQN --inference --ckpt model/20190729_163837/dq
 
 *Dueling DQN*
 ```
-python run_rl_control.py --algo DuelDQN --inference --ckpt model/DuelDQN_20190729_163837/model-ckpt ...
-```
+python run_rl_control.py --algo DuelDQN --inference --ckpt model/DuelDQN_20190730_165409/DuelDQN-ckpt-10
 
 **Simulation**
 ```
