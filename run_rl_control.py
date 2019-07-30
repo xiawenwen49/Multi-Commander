@@ -54,8 +54,8 @@ def main():
     batch_size = 32
     EPISODES = args.epoch
     learning_start = 300
-    update_model_freq = 300
-    update_target_model_freq = 1500
+    update_model_freq = 50
+    update_target_model_freq = 500
     num_step = config['num_step']
     state_size = config['state_size']
 
@@ -63,7 +63,7 @@ def main():
         # training
         if not os.path.exists("model"):
             os.makedirs("model")
-        model_dir = "model/{}".format(date)
+        model_dir = "model/{}_{}".format(args.algo, date)
         os.makedirs(model_dir)
 
         total_step = 0
@@ -104,7 +104,7 @@ def main():
 
             # save model
             if i % 10 == 9:
-                agent.model.save(model_dir + "/dqn-{}.h5".format(i+1))
+                agent.model.save(model_dir + "/{}-{}.h5".format(args.algo, i+1))
     else:
         # inference
         agent.load(args.ckpt)

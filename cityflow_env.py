@@ -3,7 +3,6 @@ import pandas as pd
 import os
 # from sim_setting import sim_setting_control
 
-
 class CityFlowEnv(object):
     def __init__(self, config):
         # cityflow_config['rlTrafficLight'] = rl_control # use RL to control the light or not

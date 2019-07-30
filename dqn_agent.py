@@ -1,3 +1,7 @@
+"""
+DQN and Double DQN agent implementation using Keras
+"""
+
 import random
 import numpy as np
 from collections import deque
@@ -39,7 +43,7 @@ class DQNAgent:
         self.target_model.set_weights(weights)
 
     def remember(self, state, action, reward, next_state):
-        action = self.phase_list.index(action)
+        action = self.phase_list.index(action) # index
         self.memory.append((state, action, reward, next_state))
 
     def choose_action(self, state):
