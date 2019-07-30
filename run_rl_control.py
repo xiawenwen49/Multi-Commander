@@ -18,7 +18,7 @@ def main():
     parser = argparse.ArgumentParser()
     # parser.add_argument('--scenario', type=str, default='PongNoFrameskip-v4')
     parser.add_argument('--config', type=str, default='config/global_config.json', help='config file')
-    parser.add_argument('--algo', type=str, default='DuelDQN', choices=['DQN', 'DDQN', 'DuelDQN'], help='choose an algorithm')
+    parser.add_argument('--algo', type=str, default='DQN', choices=['DQN', 'DDQN', 'DuelDQN'], help='choose an algorithm')
     parser.add_argument('--inference', action="store_true", help='inference or training')
     parser.add_argument('--ckpt', type=str, help='inference or training')
     parser.add_argument('--epoch', type=int, default=10, help='number of training epochs')
@@ -73,11 +73,13 @@ def main():
         for i in range(EPISODES):
             env.reset()
             state = env.get_state()
+
             state = np.array(list(state['start_lane_vehicle_count'].values()) + [state['current_phase']] )
             state = np.reshape(state, [1, state_size])
 
             episode_length = 0
             while episode_length < num_step:
+                
                 action = agent.choose_action(state) # index of action
                 action_phase = phase_list[action] # actual action
                 # no yellow light

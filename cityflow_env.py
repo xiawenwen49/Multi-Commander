@@ -1,6 +1,7 @@
 import cityflow
 import pandas as pd
 import os
+import json
 # from sim_setting import sim_setting_control
 
 class CityFlowEnv(object):
@@ -10,6 +11,7 @@ class CityFlowEnv(object):
 
         self.config = config
         self.num_step = config['num_step']
+        self.state_size = config['state_size']
         self.lane_phase_info = config['lane_phase_info'] # "intersection_1_1"
 
         self.intersection_id = list(self.lane_phase_info.keys())[0]
@@ -20,8 +22,10 @@ class CityFlowEnv(object):
         self.current_phase = self.phase_list[0]
         self.current_phase_time = 0
         self.yellow_time = 5
+        self.state_store_i = 0
 
         self.phase_log = []
+
 
     def reset(self):
         self.eng.reset()
@@ -51,8 +55,16 @@ class CityFlowEnv(object):
         state['current_phase'] = self.current_phase
         state['current_phase_time'] = self.current_phase_time
 
+        # return_state = np.array(list(state['start_lane_vehicle_count'].values()) + [state['current_phase']] )
+        # return_state = np.reshape(return_state, [1, self.state_size])
+        # if self.state_store_i <= 30:
+        #     with open("test/state/state-{}".format(self.state_store_i+1), 'w') as file:
+        #         json.dump(state, file)
+        #     self.state_store_i  += 1
+            
         return state
 
+    
     def get_reward(self):
         # a sample reward function which calculates the total of waiting vehicles
         lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()
