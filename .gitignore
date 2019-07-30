@@ -1,4 +1,7 @@
 model/
 __pycache__/
-
+examples/replay.txt
+examples/roadnet.json
+frontend/replay/replay.txt
+frontend/replay/roadnet.json
 

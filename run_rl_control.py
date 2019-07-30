@@ -9,6 +9,7 @@ import cityflow
 from cityflow_env import CityFlowEnv
 from utility import parse_roadnet
 from dqn_agent import DQNAgent, DDQNAgent
+from duelingDQN import DuelingDQNAgent
 # import ray
 
 def main():
@@ -17,7 +18,7 @@ def main():
     parser = argparse.ArgumentParser()
     # parser.add_argument('--scenario', type=str, default='PongNoFrameskip-v4')
     parser.add_argument('--config', type=str, default='config/global_config.json', help='config file')
-    parser.add_argument('--algo', type=str, default='DQN', choices=['DQN', 'DDQN', 'DuelDQN'], help='choose an algorithm')
+    parser.add_argument('--algo', type=str, default='DuelDQN', choices=['DQN', 'DDQN', 'DuelDQN'], help='choose an algorithm')
     parser.add_argument('--inference', action="store_true", help='inference or training')
     parser.add_argument('--ckpt', type=str, help='inference or training')
     parser.add_argument('--epoch', type=int, default=10, help='number of training epochs')
@@ -49,6 +50,8 @@ def main():
         agent = DQNAgent(config)
     elif args.algo == 'DDQN':
         agent = DDQNAgent(config)
+    elif args.algo == 'DuelDQN':
+        agent = DuelingDQNAgent(config)
 
     # parameters for training and inference
     batch_size = 32
@@ -100,11 +103,15 @@ def main():
 
                 # log
                 logging.info("episode:{}/{}, total_step:{}, action:{}, reward:{}"
-                            .format(i, EPISODES, total_step, action, reward))
+                            .format(i+1, EPISODES, total_step, action, reward))
 
             # save model
-            if i % 10 == 9:
-                agent.model.save(model_dir + "/{}-{}.h5".format(args.algo, i+1))
+            if (i + 1) % 10 == 0:
+                if args.algo != 'DuelDQN':
+                    agent.model.save(model_dir + "/{}-{}.h5".format(args.algo, i+1))
+                else:
+                    agent.save(model_dir + "/{}-ckpt".format(args.algo), i+1)
+                
     else:
         # inference
         agent.load(args.ckpt)

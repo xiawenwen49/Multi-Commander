@@ -2,9 +2,11 @@
 Dueling DQN implementation using tensorflow
 """
 
-import tensorflow
+import tensorflow as tf
 import numpy as np
 import random 
+from collections import deque
+import copy
 
 class DuelingDQNAgent(object):
     def __init__(self, config):
@@ -24,16 +26,24 @@ class DuelingDQNAgent(object):
                             'V':[1],
                             'A':[20, self.action_size]}
         self.global_step = 0
+
+        
+        self.sess = tf.Session()
+        self.sess.__enter__()
+        
         self._build_model()
+        self.sess.run(tf.global_variables_initializer())
         self.update_target_network()
 
+        self.saver = tf.train.Saver() # must after initializer
+
         intersection_id = list(config['lane_phase_info'].keys())[0]
-        self.phase_list = config['lane_phase_info'][intersection_id]['phase_id']
+        self.phase_list = config['lane_phase_info'][intersection_id]['phase']
     
     def _build_model(self):
-        self.state = tf.placeholder(tf.float32, [None, ] + self.state_size, name='state')
-        self.state_ = tf.placeholder(tf.float32, [None, ] + self.state_size, name='state_')
-        self.q_target = tf.placeholder(tf.float32, [None, ] + self.action_size, name='q_target')
+        self.state = tf.placeholder(tf.float32, [None, ] + [self.state_size], name='state')
+        self.state_ = tf.placeholder(tf.float32, [None, ] + [self.state_size], name='state_')
+        self.q_target = tf.placeholder(tf.float32, [None, ] + [self.action_size], name='q_target')
         
         # with tf.variable_scope('qnet'):
         #     pass
@@ -41,8 +51,8 @@ class DuelingDQNAgent(object):
         # with tf.variable_scope('target'):
         #     pass
        
-        self.qmodel_output = _build_network(scope='qnet', self.state, self.layer_size)
-        self.targte_model_output = _build_network(scope='target', self.state_, self.layer_size)
+        self.qmodel_output = self._build_network('qnet', self.state, self.layer_size)
+        self.targte_model_output = self._build_network('target', self.state_, self.layer_size)
         
         # loss, and other operations
         with tf.variable_scope('loss'):
@@ -56,7 +66,7 @@ class DuelingDQNAgent(object):
         self.copy_target_op = [tf.assign(t, q) for t, q in zip(self.target_net_paprams, self.q_net_params)]
         
 
-    def _build_network(self, scope, state, layer_size)
+    def _build_network(self, scope, state, layer_size):
         with tf.variable_scope(scope):
             with tf.variable_scope('shared'):
                 hidden = state
@@ -91,19 +101,15 @@ class DuelingDQNAgent(object):
                 
         return out
     
-    # def predict(self, state):
-    #     feed_dict = {}
-    #     predict_ = tf.get_default_session().run()
-    #     ...
     
     def choose_action(self, state):
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_size)
-        q_values = tf.get_default_session(self.qmodel_output, feed_dict={self.state: state})
-        return np.argmax(q_values)
+        q_values = tf.get_default_session().run(self.qmodel_output, feed_dict={self.state: state})
+        return np.argmax(q_values[0])
 
     def replay(self):
-        minibatch = ramdom.sample(self.memory, self.batch_size)
+        minibatch = random.sample(self.memory, self.batch_size)
         states = []
         q_target = []
         for state, action, reward, next_state in minibatch:
@@ -112,12 +118,13 @@ class DuelingDQNAgent(object):
             q_next = tf.get_default_session().run(self.qmodel_output, feed_dict={self.state:next_state})
 
             target_value = reward + self.gamma * np.max(q_next)
+            # q_target_ = copy.copy(q_eval)
             q_target_ = q_eval.copy()
-            q_target_[action] = target_value
+            q_target_[0][action] = target_value
             q_target.append(q_target_)
         
         states = np.reshape(np.array(states), [-1, self.state_size])
-        q_target = np.reshape(np.array(q_target), [-1, self.state_size])
+        q_target = np.reshape(np.array(q_target), [-1, self.action_size])
 
         feed_dict = {self.state:states,
                     self.q_target:q_target}
@@ -130,4 +137,13 @@ class DuelingDQNAgent(object):
     def remember(self, state, action, reward, next_state):
         action = self.phase_list.index(action)
         self.memory.append((state, action, reward, next_state))
+    
+    def save(self, ckpt, epoch):
+        self.saver.save(self.sess, ckpt, global_step=epoch)
+        print("model saved: {}-{}".format(ckpt, epoch))
+
+    def load(self, ckpt):
+        self.saver.restore(self.sess, ckpt)
+        
+
 
