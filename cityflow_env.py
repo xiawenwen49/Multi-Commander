@@ -65,6 +65,10 @@ class CityFlowEnv(object):
         return state
 
     
+    def state_transform(self):
+        pass
+
+
     def get_reward(self):
         # a sample reward function which calculates the total of waiting vehicles
         lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()

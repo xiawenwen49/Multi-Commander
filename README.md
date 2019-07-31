@@ -23,7 +23,7 @@ python run_rl_control.py --algo DuelDQN --epoch 10
 
 *DQN*
 ```
-python run_rl_control.py --algo DQN --inference --ckpt model/20190729_163837/dqn-10.h5
+python run_rl_control.py --algo DQN --inference --num_step 950 --ckpt model/DQN_20190731_144939/DQN-200.h5
 ```
 *DDQN*
 ```
