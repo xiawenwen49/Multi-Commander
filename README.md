@@ -37,7 +37,8 @@ python run_rl_control.py --algo DuelDQN --inference --ckpt model/DuelDQN_2019073
 **Simulation**
 ```
 . simulation.sh
-open firefox (http://localhost:8080/?roadnetFile=roadnet.json&logFile=replay.txt)
+
+open firefox with the url: http://localhost:8080/?roadnetFile=roadnet.json&logFile=replay.txt
 ```
 
 
