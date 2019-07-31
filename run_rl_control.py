@@ -4,6 +4,7 @@ import logging
 import os
 import numpy as np
 from datetime import datetime
+from tqdm import tqdm
 
 import cityflow
 from cityflow_env import CityFlowEnv
@@ -71,49 +72,54 @@ def main():
         os.makedirs(model_dir)
 
         total_step = 0
-        for i in range(EPISODES):
-            env.reset()
-            state = env.get_state()
+        with tqdm(total=EPISODES*args.num_step) as pbar:
+            for i in range(EPISODES):
+                env.reset()
+                state = env.get_state()
 
-            state = np.array(list(state['start_lane_vehicle_count'].values()) + [state['current_phase']] )
-            state = np.reshape(state, [1, state_size])
+                state = np.array(list(state['start_lane_vehicle_count'].values()) + [state['current_phase']] )
+                state = np.reshape(state, [1, state_size])
 
-            episode_length = 0
-            while episode_length < num_step:
-                
-                action = agent.choose_action(state) # index of action
-                action_phase = phase_list[action] # actual action
-                # no yellow light
-                next_state, reward = env.step(action_phase) # one step
-                last_action_phase = action_phase
-                episode_length += 1
-                total_step += 1
+                episode_length = 0
+                while episode_length < num_step:
+                    
+                    action = agent.choose_action(state) # index of action
+                    action_phase = phase_list[action] # actual action
+                    # no yellow light
+                    next_state, reward = env.step(action_phase) # one step
+                    last_action_phase = action_phase
+                    episode_length += 1
+                    total_step += 1
 
-                # store to replay buffer
-                next_state = np.array(list(next_state['start_lane_vehicle_count'].values()) + [next_state['current_phase']])
-                next_state = np.reshape(next_state, [1, state_size])
-                agent.remember(state, action_phase, reward, next_state)
+                    pbar.update(1)
 
-                state = next_state
+                    # store to replay buffer
+                    next_state = np.array(list(next_state['start_lane_vehicle_count'].values()) + [next_state['current_phase']])
+                    next_state = np.reshape(next_state, [1, state_size])
+                    agent.remember(state, action_phase, reward, next_state)
 
-                # training
-                if total_step > learning_start and total_step % update_model_freq == 0:
-                    agent.replay()
+                    state = next_state
 
-                # update target Q netwark
-                if total_step > learning_start and total_step % update_target_model_freq == 0:
-                    agent.update_target_network()
+                    # training
+                    if total_step > learning_start and total_step % update_model_freq == 0:
+                        agent.replay()
 
-                # log
-                logging.info("episode:{}/{}, total_step:{}, action:{}, reward:{}"
-                            .format(i+1, EPISODES, total_step, action, reward))
+                    # update target Q netwark
+                    if total_step > learning_start and total_step % update_target_model_freq == 0:
+                        agent.update_target_network()
 
-            # save model
-            if (i + 1) % args.save_freq == 0:
-                if args.algo != 'DuelDQN':
-                    agent.model.save(model_dir + "/{}-{}.h5".format(args.algo, i+1))
-                else:
-                    agent.save(model_dir + "/{}-ckpt".format(args.algo), i+1)
+                    # logging
+                    # logging.info("\repisode:{}/{}, total_step:{}, action:{}, reward:{}"
+                    #             .format(i+1, EPISODES, total_step, action, reward))
+                    pbar.set_description(
+                        "total_step:{}, episode:{}, epidode_step:{}, reward:{}".format(total_step, i+1, episode_length, reward))
+
+                # save model
+                if (i + 1) % args.save_freq == 0:
+                    if args.algo != 'DuelDQN':
+                        agent.model.save(model_dir + "/{}-{}.h5".format(args.algo, i+1))
+                    else:
+                        agent.save(model_dir + "/{}-ckpt".format(args.algo), i+1)
                 
     else:
         # inference
