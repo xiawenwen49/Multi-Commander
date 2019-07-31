@@ -29,10 +29,10 @@ python run_rl_control.py --algo DQN --inference --num_step 950 --ckpt model/DQN_
 ```
 python run_rl_control.py --algo DDQN --inference --ckpt model/20190729_163837/dqn-10.h5
 ```
-
 *Dueling DQN*
 ```
 python run_rl_control.py --algo DuelDQN --inference --ckpt model/DuelDQN_20190730_165409/DuelDQN-ckpt-10
+
 
 **Simulation**
 ```
