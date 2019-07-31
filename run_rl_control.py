@@ -23,6 +23,7 @@ def main():
     parser.add_argument('--ckpt', type=str, help='inference or training')
     parser.add_argument('--epoch', type=int, default=10, help='number of training epochs')
     parser.add_argument('--num_step', type=int, default=10**3, help='number of timesteps for one episode, and for inference')
+    parser.add_argument('--save_freq', type=int, default=100, help='model saving frequency)
     
     args = parser.parse_args()
 
@@ -108,7 +109,7 @@ def main():
                             .format(i+1, EPISODES, total_step, action, reward))
 
             # save model
-            if (i + 1) % 10 == 0:
+            if (i + 1) % args.save_freq == 0:
                 if args.algo != 'DuelDQN':
                     agent.model.save(model_dir + "/{}-{}.h5".format(args.algo, i+1))
                 else:
