@@ -110,7 +110,7 @@ def main():
                     episode_reward += reward
 
                     for _ in range(args.step-1):
-                        next_state, reward_ = env.(action_phase)
+                        next_state, reward_ = env.step(action_phase)
                         reward += reward_
                     
                     reward /= args.step 

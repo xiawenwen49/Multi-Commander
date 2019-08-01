@@ -2,6 +2,7 @@ import cityflow
 import pandas as pd
 import os
 import json
+import math
 # from sim_setting import sim_setting_control
 
 class CityFlowEnv(object):
@@ -72,7 +73,8 @@ class CityFlowEnv(object):
     def get_reward(self):
         # a sample reward function which calculates the total of waiting vehicles
         lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()
-        reward = -1 * sum(list(lane_waiting_vehicle_count.values()))
+        lane_waiting_vehicle_count_list = list(lane_waiting_vehicle_count.values())
+        reward = -1 * ( sum(lane_waiting_vehicle_count_list) + max(lane_waiting_vehicle_count_list) )
         return reward
 
     def log(self):
@@ -84,3 +86,15 @@ class CityFlowEnv(object):
 
         df = pd.DataFrame({self.intersection_id: self.phase_log[:self.num_step]})
         df.to_csv(os.path.join(self.config['replay_data_path'], 'signal_plan.txt'), index=None)
+<<<<<<< HEAD
+=======
+
+class CityFlowEnvR1(CityFlowEnv):
+    def __init__(self, config):
+        super(CityFlowEnvR1, self).__init__(config)
+    
+    def get_reward(self):
+        lane_vehicle_count = self.eng.get_lane_vehicle_count()
+        reward = (100000 - lane_vehicle_count)/1 + math.exp(-1 * lane_vehicle_count)
+        return reward
+>>>>>>> ab8dec1bbb6699d23bad3eac393eca66241cef47
