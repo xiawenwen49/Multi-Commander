@@ -26,7 +26,7 @@ class DQNAgent:
         self.epsilon_decay = 0.995
         self.learning_rate = 0.001
         self.update_target_freq = 5
-        self.batch_size = 30
+        self.batch_size = config['batch_size']
         self.model = self._build_model()
         self.target_model = self._build_model()
         self.update_target_network()

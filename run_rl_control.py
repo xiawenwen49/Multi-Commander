@@ -29,13 +29,16 @@ def main():
     parser.add_argument('--epoch', type=int, default=10, help='number of training epochs')
     parser.add_argument('--num_step', type=int, default=10**3, help='number of timesteps for one episode, and for inference')
     parser.add_argument('--save_freq', type=int, default=100, help='model saving frequency')
+    parser.add_argument('--batch_size', type=int, default=128, help='model saving frequency')
     
     args = parser.parse_args()
 
     # preparing config
-    # # for rnvironment
+    # # for environment
     config = json.load(open(args.config))
     config["num_step"] = args.num_step
+    
+
     # config["replay_data_path"] = "replay"
     cityflow_config = json.load(open(config['cityflow_config_file']))
     roadnetFile = cityflow_config['dir'] + cityflow_config['roadnetFile']
@@ -47,6 +50,7 @@ def main():
     logging.info(phase_list)
     config["state_size"] = len(config['lane_phase_info'][intersection_id]['start_lane']) + 1 # 1 is for the current phase. [vehicle_count for each start lane] + [current_phase]
     config["action_size"] = len(phase_list)
+    config["batch_size"] = args.batch_size
 
     # build cityflow environment
     env = CityFlowEnv(config)
@@ -60,7 +64,7 @@ def main():
         agent = DuelingDQNAgent(config)
 
     # parameters for training and inference
-    batch_size = 32
+    # batch_size = 32
     EPISODES = args.epoch
     learning_start = 300
     update_model_freq = 50
