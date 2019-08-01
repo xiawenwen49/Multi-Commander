@@ -84,6 +84,7 @@ def main():
         episode_rewards = []
         with tqdm(total=EPISODES*args.num_step) as pbar:
             for i in range(EPISODES):
+                print(i)
                 env.reset()
                 state = env.get_state()
 
