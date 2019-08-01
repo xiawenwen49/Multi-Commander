@@ -68,7 +68,7 @@ class DQNAgent:
 
     def save(self, name):
         self.model.save_weights(name)
-        print("model daved:{}".format(name))
+        print("model saved:{}".format(name))
 
 
 class DDQNAgent(DQNAgent):

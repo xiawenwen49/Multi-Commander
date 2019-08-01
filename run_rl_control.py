@@ -5,6 +5,8 @@ import os
 import numpy as np
 from datetime import datetime
 from tqdm import tqdm
+import pandas as pd
+
 
 import cityflow
 from cityflow_env import CityFlowEnv
@@ -12,6 +14,8 @@ from utility import parse_roadnet
 from dqn_agent import DQNAgent, DDQNAgent
 from duelingDQN import DuelingDQNAgent
 # import ray
+
+os.environ["CUDA_VISIBLE_DEVICES"]="0" # use GPU
 
 def main():
     logging.getLogger().setLevel(logging.INFO)
@@ -68,10 +72,16 @@ def main():
         # training
         if not os.path.exists("model"):
             os.makedirs("model")
+        if not os.path.exists("result"):
+            os.makedirs("result")
         model_dir = "model/{}_{}".format(args.algo, date)
+        result_dir = "result/{}_{}".format(args.algo, date)
+
         os.makedirs(model_dir)
+        os.makedirs(result_dir)
 
         total_step = 0
+        episode_rewards = []
         with tqdm(total=EPISODES*args.num_step) as pbar:
             for i in range(EPISODES):
                 env.reset()
@@ -81,6 +91,7 @@ def main():
                 state = np.reshape(state, [1, state_size])
 
                 episode_length = 0
+                episode_reward = 0
                 while episode_length < num_step:
                     
                     action = agent.choose_action(state) # index of action
@@ -90,6 +101,7 @@ def main():
                     last_action_phase = action_phase
                     episode_length += 1
                     total_step += 1
+                    episode_reward += reward
 
                     pbar.update(1)
 
@@ -114,13 +126,22 @@ def main():
                     pbar.set_description(
                         "total_step:{}, episode:{}, epidode_step:{}, reward:{}".format(total_step, i+1, episode_length, reward))
 
+                # save episode rewards
+                episode_rewards.append(episode_reward)
+
+
                 # save model
                 if (i + 1) % args.save_freq == 0:
                     if args.algo != 'DuelDQN':
                         agent.model.save(model_dir + "/{}-{}.h5".format(args.algo, i+1))
                     else:
                         agent.save(model_dir + "/{}-ckpt".format(args.algo), i+1)
-                
+            
+            # save reward to file
+            df = pd.DataFrame({"rewards": episode_rewards})
+            df.to_csv(result_dir + '/rewards.csv', index=None)
+        
+
     else:
         # inference
         agent.load(args.ckpt)
