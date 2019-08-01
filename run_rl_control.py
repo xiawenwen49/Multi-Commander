@@ -29,7 +29,8 @@ def main():
     parser.add_argument('--epoch', type=int, default=10, help='number of training epochs')
     parser.add_argument('--num_step', type=int, default=10**3, help='number of timesteps for one episode, and for inference')
     parser.add_argument('--save_freq', type=int, default=100, help='model saving frequency')
-    parser.add_argument('--batch_size', type=int, default=128, help='model saving frequency')
+    parser.add_argument('--batch_size', type=int, default=128, help='batchsize for training')
+    parser.add_argument('--step', type=int, default=5, help='time of one phase')
     
     args = parser.parse_args()
 
@@ -103,13 +104,18 @@ def main():
                     action_phase = phase_list[action] # actual action
                     # no yellow light
                     next_state, reward = env.step(action_phase) # one step
-                    last_action_phase = action_phase
+                    # last_action_phase = action_phase
                     episode_length += 1
                     total_step += 1
                     episode_reward += reward
 
-                    pbar.update(1)
+                    for _ in range(args.step-1):
+                        next_state, reward_ = env.(action_phase)
+                        reward += reward_
+                    
+                    reward /= args.step 
 
+                    pbar.update(1)
                     # store to replay buffer
                     next_state = np.array(list(next_state['start_lane_vehicle_count'].values()) + [next_state['current_phase']])
                     next_state = np.reshape(next_state, [1, state_size])
