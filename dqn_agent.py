@@ -12,7 +12,7 @@ import keras.backend.tensorflow_backend as KTF
 import tensorflow as tf
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 KTF.set_session(tf.Session(config=tf.ConfigProto(device_count={'gpu':0})))
 
 class DQNAgent:

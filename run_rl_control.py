@@ -125,7 +125,7 @@ def main():
                     # logging.info("\repisode:{}/{}, total_step:{}, action:{}, reward:{}"
                     #             .format(i+1, EPISODES, total_step, action, reward))
                     pbar.set_description(
-                        "total_step:{}, episode:{}, epidode_step:{}, reward:{}".format(total_step, i+1, episode_length, reward))
+                        "total_step:{}, episode:{}, episode_step:{}, reward:{}".format(total_step, i+1, episode_length, reward))
 
                 # save episode rewards
                 episode_rewards.append(episode_reward)
