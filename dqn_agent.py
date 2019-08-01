@@ -8,6 +8,9 @@ from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
+import keras.backend.tensorflow_backend as KTF
+import tensorflow as tf
+KTF.set_session(tf.Session(config=tf.ConfigProto(device_count={'gpu':0})))
 
 class DQNAgent:
     def __init__(self, config):
