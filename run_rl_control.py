@@ -148,9 +148,9 @@ def main():
                     else:
                         agent.save(model_dir + "/{}-ckpt".format(args.algo), i+1)
             
-            # save reward to file
-            df = pd.DataFrame({"rewards": episode_rewards})
-            df.to_csv(result_dir + '/rewards.csv', index=None)
+                # save reward to file
+                df = pd.DataFrame({"rewards": episode_rewards})
+                df.to_csv(result_dir + '/rewards.csv', index=None)
         
 
     else:
