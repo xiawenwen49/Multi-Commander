@@ -86,8 +86,6 @@ class CityFlowEnv(object):
 
         df = pd.DataFrame({self.intersection_id: self.phase_log[:self.num_step]})
         df.to_csv(os.path.join(self.config['replay_data_path'], 'signal_plan.txt'), index=None)
-<<<<<<< HEAD
-=======
 
 class CityFlowEnvR1(CityFlowEnv):
     def __init__(self, config):
@@ -97,4 +95,3 @@ class CityFlowEnvR1(CityFlowEnv):
         lane_vehicle_count = self.eng.get_lane_vehicle_count()
         reward = (100000 - lane_vehicle_count)/1 + math.exp(-1 * lane_vehicle_count)
         return reward
->>>>>>> ab8dec1bbb6699d23bad3eac393eca66241cef47
