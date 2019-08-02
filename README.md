@@ -12,7 +12,7 @@ python run_rl_control.py --algo DQN --epoch 200 --num_step 1500 --phase_step 1
 ```
 *Double DQN*
 ```
-python run_rl_control.py --algo DDQN --epoch 100 --num_step 1500 --phase_step 1
+python run_rl_control.py --algo DDQN --epoch 200 --num_step 1500 --phase_step 1
 ```
 *Dueling DQN*
 ```

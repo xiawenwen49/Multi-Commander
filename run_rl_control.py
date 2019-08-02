@@ -192,9 +192,10 @@ def main():
             logging.info("step:{}/{}, action:{}, reward:{}"
                             .format(i+1, args.num_step, action, reward))
 
-        # df = pd.DataFrame({"scores": scores})
-        # df.to_csv(result_dir + '/scores.csv', index=None) 
-        # plot_data_lists([scores], ['scores'], figure_name=result_dir + '/scores.pdf')
+        inf_result_dir = "reslut/" + args.ckpt.split("/")[1] 
+        df = pd.DataFrame({"inf_scores": scores})
+        df.to_csv(inf_result_dir + '/inf_scores.csv', index=None) 
+        plot_data_lists([scores], ['inference scores'], figure_name=inf_result_dir + '/inf_scores.pdf')
 
 
 

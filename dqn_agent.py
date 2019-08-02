@@ -60,12 +60,24 @@ class DQNAgent:
 
     def replay(self):
         minibatch = random.sample(self.memory, self.batch_size)
+        states = []
+        q_targets = []
         for state, action, reward, next_state in minibatch:
             target = (reward + self.gamma *
                       np.amax(self.target_model.predict(next_state)[0]))
             target_f = self.model.predict(state)
             target_f[0][action] = target # action is a action_list index
-            self.model.fit(state, target_f, epochs=1, verbose=0)
+
+            states.append(state)
+            q_targets.append(target_f)
+
+            # self.model.fit(state, target_f, epochs=1, verbose=0)
+        
+        states = np.reshape(np.array(states), [-1, self.state_size])
+        q_targets = np.reshape(np.array(q_targets), [-1, self.action_size])
+        self.model.fit(state, target_f, epochs=1, verbose=0) # batch training
+        
+
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
@@ -84,6 +96,8 @@ class DDQNAgent(DQNAgent):
     # override
     def replay(self):
         minibatch = random.sample(self.memory, self.batch_size)
+        states = []
+        q_targets = []
         for state, action, reward, next_state in minibatch:
             # compute target value, this is the key point of Double DQN
             
@@ -99,7 +113,13 @@ class DDQNAgent(DQNAgent):
             
             target_f[0][action] = target
 
-            self.model.fit(state, target_f, epochs=1, verbose=0) # train on single sample
+            states.append(state)
+            q_targets.append(target_f)
+            # self.model.fit(state, target_f, epochs=1, verbose=0) # train on single sample
+
+        states = np.reshape(np.array(states), [-1, self.state_size])
+        q_targets = np.reshape(np.array(q_targets), [-1, self.action_size])
+        self.model.fit(state, target_f, epochs=1, verbose=0) # batch training
         
         if self.epsilon > self.epsilon_min:
             self.epsilon = self.epsilon_decay
