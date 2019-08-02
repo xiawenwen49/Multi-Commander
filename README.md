@@ -23,7 +23,7 @@ python run_rl_control.py --algo DuelDQN --epoch 10
 
 *DQN*
 ```
-python run_rl_control.py --algo DQN --inference --num_step 2000 --ckpt model/DQN_20190731_144939/DQN-200.h5
+<!-- python run_rl_control.py --algo DQN --inference --num_step 2000 --ckpt model/DQN_20190731_144939/DQN-200.h5 -->
 python run_rl_control.py --algo DQN --inference --num_step 2000 --ckpt model/DQN_20190801_124826/DQN-100.h5
 ```
 *DDQN*
@@ -33,7 +33,7 @@ python run_rl_control.py --algo DDQN --inference --num_step 2000 --ckpt model/DD
 *Dueling DQN*
 ```
 python run_rl_control.py --algo DuelDQN --inference --num_step 2000 --ckpt model/DuelDQN_20190730_165409/DuelDQN-ckpt-10
-
+```
 
 **Simulation**
 ```
