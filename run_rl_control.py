@@ -31,7 +31,7 @@ def main():
     parser.add_argument('--num_step', type=int, default=1500, help='number of timesteps for one episode, and for inference')
     parser.add_argument('--save_freq', type=int, default=100, help='model saving frequency')
     parser.add_argument('--batch_size', type=int, default=32, help='batchsize for training')
-    parser.add_argument('--phase_step', type=int, default=1, help='time of one phase')
+    parser.add_argument('--phase_step', type=int, default=1, help='seconds of one phase')
     
     args = parser.parse_args()
 
@@ -88,8 +88,10 @@ def main():
             os.makedirs("model")
         if not os.path.exists("result"):
             os.makedirs("result") 
-        os.makedirs(model_dir)
-        os.makedirs(result_dir)
+        if not os.path.exists(model_dir):
+            os.makedirs(model_dir)
+        if not os.path.exists(result_dir):
+            os.makedirs(result_dir)
         
         # training
         total_step = 0
@@ -192,7 +194,7 @@ def main():
             logging.info("step:{}/{}, action:{}, reward:{}"
                             .format(i+1, args.num_step, action, reward))
 
-        inf_result_dir = "reslut/" + args.ckpt.split("/")[1] 
+        inf_result_dir = "result/" + args.ckpt.split("/")[1] 
         df = pd.DataFrame({"inf_scores": scores})
         df.to_csv(inf_result_dir + '/inf_scores.csv', index=None) 
         plot_data_lists([scores], ['inference scores'], figure_name=inf_result_dir + '/inf_scores.pdf')

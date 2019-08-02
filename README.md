@@ -16,14 +16,13 @@ python run_rl_control.py --algo DDQN --epoch 200 --num_step 1500 --phase_step 1
 ```
 *Dueling DQN*
 ```
-python run_rl_control.py --algo DuelDQN --epoch 10
+python run_rl_control.py --algo DuelDQN --epoch 200 --num_step 1500 --phase_step 1
 ```
 
 **Inference**
 
 *DQN*
 ```
-<!-- python run_rl_control.py --algo DQN --inference --num_step 2000 --ckpt model/DQN_20190731_144939/DQN-200.h5 -->
 python run_rl_control.py --algo DQN --inference --num_step 2000 --ckpt model/DQN_20190801_124826/DQN-100.h5
 ```
 *DDQN*

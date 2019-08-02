@@ -118,7 +118,7 @@ class DuelingDQNAgent(object):
         for state, action, reward, next_state in minibatch:
             states.append(state)
             q_eval = tf.get_default_session().run(self.qmodel_output, feed_dict={self.state:state})
-            q_next = tf.get_default_session().run(self.targte_model_output, feed_dict={self.state:next_state})
+            q_next = tf.get_default_session().run(self.targte_model_output, feed_dict={self.state_:next_state})
 
             target_value = reward + self.gamma * np.max(q_next)
             # q_target_ = copy.copy(q_eval)
