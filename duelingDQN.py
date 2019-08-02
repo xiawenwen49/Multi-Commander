@@ -36,6 +36,7 @@ class DuelingDQNAgent(object):
         self.update_target_network()
 
         self.saver = tf.train.Saver() # must after initializer
+        self.file_writer = tf.summary.FileWriter(config["result_dir"], self.sess.graph)
 
         intersection_id = list(config['lane_phase_info'].keys())[0]
         self.phase_list = config['lane_phase_info'][intersection_id]['phase']
@@ -57,6 +58,7 @@ class DuelingDQNAgent(object):
         # loss, and other operations
         with tf.variable_scope('loss'):
             self.q_loss = tf.reduce_mean(tf.squared_difference(self.qmodel_output, self.q_target))
+            tf.summary.scalar('Q net TD loss', self.q_loss)
         with tf.variable_scope('train'):
             self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.q_loss)
         
@@ -64,6 +66,7 @@ class DuelingDQNAgent(object):
         self.q_net_params = tf.get_collection('qnet')
         self.target_net_paprams = tf.get_collection('target')
         self.copy_target_op = [tf.assign(t, q) for t, q in zip(self.target_net_paprams, self.q_net_params)]
+        self.merged = tf.summary.merge_all()
         
 
     def _build_network(self, scope, state, layer_size):
@@ -129,7 +132,9 @@ class DuelingDQNAgent(object):
         feed_dict = {self.state:states,
                     self.q_target:q_target}
         # batch training
-        tf.get_default_session().run(self.train_op, feed_dict=feed_dict)
+        _, summary= tf.get_default_session().run([self.train_op, self.merged], feed_dict=feed_dict)
+        self.file_writer.add_summary(summary)
+
     
     def update_target_network(self):
         tf.get_default_session().run(self.copy_target_op)

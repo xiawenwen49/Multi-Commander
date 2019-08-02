@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import json
 import math
+import numpy as np
 # from sim_setting import sim_setting_control
 
 class CityFlowEnv(object):
@@ -12,10 +13,11 @@ class CityFlowEnv(object):
 
         self.config = config
         self.num_step = config['num_step']
-        self.state_size = config['state_size']
+        self.state_size = len(config['lane_phase_info'][config["intersection_id"]]['start_lane']) + 1
         self.lane_phase_info = config['lane_phase_info'] # "intersection_1_1"
-
-        self.intersection_id = list(self.lane_phase_info.keys())[0]
+        self.intersection_id = config["intersection_id"]
+        # self.intersection_id = list(self.lane_phase_info.keys())[0]
+        
         self.start_lane = self.lane_phase_info[self.intersection_id]['start_lane']
         self.phase_list = self.lane_phase_info[self.intersection_id]["phase"]
         self.phase_startLane_mapping = self.lane_phase_info[self.intersection_id]["phase_startLane_mapping"]
@@ -56,26 +58,33 @@ class CityFlowEnv(object):
         state['current_phase'] = self.current_phase
         state['current_phase_time'] = self.current_phase_time
 
-        # return_state = np.array(list(state['start_lane_vehicle_count'].values()) + [state['current_phase']] )
-        # return_state = np.reshape(return_state, [1, self.state_size])
-        # if self.state_store_i <= 30:
-        #     with open("test/state/state-{}".format(self.state_store_i+1), 'w') as file:
-        #         json.dump(state, file)
-        #     self.state_store_i  += 1
+
+        return_state = np.array(list(state['start_lane_vehicle_count'].values()) + [state['current_phase']] )
+        return_state = np.reshape(return_state, [1, self.state_size])
             
-        return state
+        return return_state
 
+
+    # def get_reward(self):
+    #     # a sample reward function which calculates the total of waiting vehicles
+    #     lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()
+    #     lane_waiting_vehicle_count_list = list(lane_waiting_vehicle_count.values())
+    #     reward = -1 * ( sum(lane_waiting_vehicle_count_list)/len(lane_waiting_vehicle_count_list) + max(lane_waiting_vehicle_count_list) )
+    #     return reward
     
-    def state_transform(self):
-        pass
-
-
     def get_reward(self):
-        # a sample reward function which calculates the total of waiting vehicles
-        lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()
-        lane_waiting_vehicle_count_list = list(lane_waiting_vehicle_count.values())
-        reward = -1 * ( sum(lane_waiting_vehicle_count_list) + max(lane_waiting_vehicle_count_list) )
+        # reward function
+        lane_vehicle_count = self.eng.get_lane_vehicle_count()
+        vehicle_velocity = self.eng.get_vehicle_speed()
+        reward = sum(list(vehicle_velocity.values())) / (sum(list(lane_vehicle_count.values())) + 2)
         return reward
+
+    def get_score(self):
+        lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()
+        reward = -1 * sum(list(lane_waiting_vehicle_count.values()))
+        metric = 1/((1 + math.exp(-1 * reward)) * self.config["num_step"])
+        return metric
+
 
     def log(self):
         if not os.path.exists(self.config['replay_data_path']):
@@ -87,11 +96,11 @@ class CityFlowEnv(object):
         df = pd.DataFrame({self.intersection_id: self.phase_log[:self.num_step]})
         df.to_csv(os.path.join(self.config['replay_data_path'], 'signal_plan.txt'), index=None)
 
-class CityFlowEnvR1(CityFlowEnv):
-    def __init__(self, config):
-        super(CityFlowEnvR1, self).__init__(config)
+# class CityFlowEnvSR(CityFlowEnv):
+#     def __init__(self, config):
+#         super(CityFlowEnvR1, self).__init__(config)
     
-    def get_reward(self):
-        lane_vehicle_count = self.eng.get_lane_vehicle_count()
-        reward = (100000 - lane_vehicle_count)/1 + math.exp(-1 * lane_vehicle_count)
-        return reward
+#     def get_score(self):
+#         lane_vehicle_count = self.eng.get_lane_vehicle_count()
+#         reward = (100000 - lane_vehicle_count)/1 + math.exp(-1 * lane_vehicle_count)
+#         return reward
