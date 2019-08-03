@@ -49,7 +49,7 @@ def main():
     # # for agent
     intersection_id = list(config['lane_phase_info'].keys())[0]
     config["intersection_id"] = intersection_id
-    config["state_size"] = len(config['lane_phase_info'][config["intersection_id"]]['start_lane']) + 1
+    # config["state_size"] = len(config['lane_phase_info'][config["intersection_id"]]['start_lane']) + 1
     # config["state_size"] = len(config['lane_phase_info'][config["intersection_id"]]['start_lane']) + 1 + 4
 
     phase_list = config['lane_phase_info'][config["intersection_id"]]['phase']
@@ -62,20 +62,14 @@ def main():
     result_dir = "result/{}_{}".format(args.algo, date)
     config["result_dir"] = result_dir
 
-    # build agent
-    if args.algo == 'DQN':
-        agent = DQNAgent(config)
-    elif args.algo == 'DDQN':
-        agent = DDQNAgent(config)
-    elif args.algo == 'DuelDQN':
-        agent = DuelingDQNAgent(config)
+    
 
     # parameters for training and inference
     # batch_size = 32
     EPISODES = args.epoch
-    learning_start = 2000
-    # update_model_freq = args.batch_size
-    update_model_freq = 1
+    learning_start = 300
+    update_model_freq = args.batch_size
+    # update_model_freq = 1
     update_target_model_freq = 200
 
     if not args.inference:
@@ -83,6 +77,15 @@ def main():
         cityflow_config["saveReplay"] = False
         json.dump(cityflow_config, open(config["cityflow_config_file"], 'w'))
         env = CityFlowEnv(config)
+
+        # build agent
+        config["state_size"] = env.state_size
+        if args.algo == 'DQN':
+            agent = DQNAgent(config)
+        elif args.algo == 'DDQN':
+            agent = DDQNAgent(config)
+        elif args.algo == 'DuelDQN':
+            agent = DuelingDQNAgent(config)
 
         # make dirs
         if not os.path.exists("model"):
@@ -150,10 +153,9 @@ def main():
 
 
                 # save episode rewards
-                episode_rewards.append(episode_reward)
+                episode_rewards.append(episode_reward/args.num_step) # record episode mean reward
                 episode_scores.append(episode_score)
                 print("score: {}, mean reward:{}".format(episode_score, episode_reward/args.num_step))
-
 
                 # save model
                 if (i + 1) % args.save_freq == 0:
@@ -170,9 +172,9 @@ def main():
                     df.to_csv(result_dir + '/scores.csv', index=None)
 
 
-            # save figure
-            plot_data_lists([episode_rewards], ['episode reward'], figure_name=result_dir + '/rewards.pdf')
-            plot_data_lists([episode_scores], ['episode score'], figure_name=result_dir + '/scores.pdf')
+                    # save figure
+                    plot_data_lists([episode_rewards], ['episode reward'], figure_name=result_dir + '/rewards.pdf')
+                    plot_data_lists([episode_scores], ['episode score'], figure_name=result_dir + '/scores.pdf')
         
 
     else:
@@ -182,7 +184,15 @@ def main():
         env = CityFlowEnv(config)
         env.reset()
 
-        agent.load(args.ckpt)
+        # build agent
+        config["state_size"] = env.state_size
+        if args.algo == 'DQN':
+            agent = DQNAgent(config)
+        elif args.algo == 'DDQN':
+            agent = DDQNAgent(config)
+        elif args.algo == 'DuelDQN':
+            agent = DuelingDQNAgent(config)
+        agent.load(args.ckpt)   
         
         state = env.get_state()
         scores = []
@@ -190,12 +200,20 @@ def main():
             action = agent.choose_action(state) # index of action
             action_phase = phase_list[action] # actual action
             next_state, reward = env.step(action_phase) # one step
-            scores.append(env.get_score())
+
+            for _ in range(args.phase_step-1):
+                next_state, reward_ = env.step(action_phase)
+                reward += reward_
+                    
+            reward /= args.phase_step 
+
+            score = env.get_score()
+            scores.append(score)
             state = next_state
 
             # logging
-            logging.info("step:{}/{}, action:{}, reward:{}"
-                            .format(i+1, args.num_step, action, reward))
+            logging.info("step:{}/{}, action:{}, reward:{}, score:{}"
+                            .format(i+1, args.num_step, action, reward, score))
 
         inf_result_dir = "result/" + args.ckpt.split("/")[1] 
         df = pd.DataFrame({"inf_scores": scores})

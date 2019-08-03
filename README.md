@@ -8,22 +8,22 @@ Implementation of DQN, Double DQN and Dueling DQN
 
 *DQN*
 ```
-python run_rl_control.py --algo DQN --epoch 200 --num_step 3000 --phase_step 1
+python run_rl_control.py --algo DQN --epoch 200 --num_step 2000 --phase_step 1
 ```
 *Double DQN*
 ```
-python run_rl_control.py --algo DDQN --epoch 200 --num_step 1500 --phase_step 1
+python run_rl_control.py --algo DDQN --epoch 200 --num_step 2000 --phase_step 1
 ```
 *Dueling DQN*
 ```
-python run_rl_control.py --algo DuelDQN --epoch 200 --num_step 1500 --phase_step 1
+python run_rl_control.py --algo DuelDQN --epoch 200 --num_step 2000 --phase_step 1
 ```
 
 **Inference**
 
 *DQN*
 ```
-python run_rl_control.py --algo DQN --inference --num_step 2000 --ckpt model/DQN_20190801_124826/DQN-100.h5
+python run_rl_control.py --algo DQN --inference --num_step 3000 --ckpt model/DQN_20190803_150924/DQN-200.h5
 ```
 *DDQN*
 ```

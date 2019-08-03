@@ -74,7 +74,7 @@ class DQNAgent:
         
         states = np.reshape(np.array(states), [-1, self.state_size])
         q_targets = np.reshape(np.array(q_targets), [-1, self.action_size])
-        self.model.fit(state, target_f, epochs=3, verbose=0) # batch training
+        self.model.fit(state, target_f, epochs=2, verbose=0) # batch training
         
 
         if self.epsilon > self.epsilon_min:
