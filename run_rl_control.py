@@ -30,7 +30,7 @@ def main():
     parser.add_argument('--epoch', type=int, default=10, help='number of training epochs')
     parser.add_argument('--num_step', type=int, default=1500, help='number of timesteps for one episode, and for inference')
     parser.add_argument('--save_freq', type=int, default=100, help='model saving frequency')
-    parser.add_argument('--batch_size', type=int, default=32, help='batchsize for training')
+    parser.add_argument('--batch_size', type=int, default=64, help='batchsize for training')
     parser.add_argument('--phase_step', type=int, default=1, help='seconds of one phase')
     
     args = parser.parse_args()
@@ -47,8 +47,8 @@ def main():
     config["lane_phase_info"] = parse_roadnet(roadnetFile)
 
     # # for agent
-    # intersection_id = list(config['lane_phase_info'].keys())[0]
-    config["intersection_id"] = "intersection_1_1"
+    intersection_id = list(config['lane_phase_info'].keys())[0]
+    config["intersection_id"] = intersection_id
     config["state_size"] = len(config['lane_phase_info'][config["intersection_id"]]['start_lane']) + 1
     # config["state_size"] = len(config['lane_phase_info'][config["intersection_id"]]['start_lane']) + 1 + 4
 
@@ -73,8 +73,9 @@ def main():
     # parameters for training and inference
     # batch_size = 32
     EPISODES = args.epoch
-    learning_start = 300
-    update_model_freq = args.batch_size
+    learning_start = 2000
+    # update_model_freq = args.batch_size
+    update_model_freq = 1
     update_target_model_freq = 200
 
     if not args.inference:
@@ -127,16 +128,18 @@ def main():
 
                     pbar.update(1)
                     # store to replay buffer
-                    agent.remember(state, action_phase, reward, next_state)
+                    if episode_length > learning_start:
+                        agent.remember(state, action_phase, reward, next_state)
 
                     state = next_state
 
                     # training
-                    if total_step > learning_start and total_step % update_model_freq == 0:
-                        agent.replay()
+                    if episode_length > learning_start and total_step % update_model_freq == 0:
+                        if len(agent.memory) > args.batch_size:
+                            agent.replay()
 
                     # update target Q netwark
-                    if total_step > learning_start and total_step % update_target_model_freq == 0:
+                    if episode_length > learning_start and total_step % update_target_model_freq == 0:
                         agent.update_target_network()
 
                     # logging

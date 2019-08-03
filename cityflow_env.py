@@ -78,13 +78,20 @@ class CityFlowEnv(object):
         vehicle_velocity = self.eng.get_vehicle_speed()
         reward = sum(list(vehicle_velocity.values())) / (sum(list(lane_vehicle_count.values())) + 2)
         return reward
+    
+    # def get_reward(self):
+    #     # reward function
+    #     lane_waiting_vehicle_count = self.eng.get_lane_vehicle_count()
+    #     lane_waiting_vehicle_count_list = list(lane_waiting_vehicle_count.values())
+    #     reward = -1 * max(lane_waiting_vehicle_count_list)
+    #     return reward
 
     def get_score(self):
-        lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()
-        reward = -1 * sum(list(lane_waiting_vehicle_count.values()))
-        metric = 1/((1 + math.exp(-1 * reward)) * self.config["num_step"])
-        return metric
-
+        # lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()
+        # reward = -1 * sum(list(lane_waiting_vehicle_count.values()))
+        # metric = (1/(1 + math.exp(-1 * reward))) / self.config["num_step"]
+        # return metric
+        return 0
 
     def log(self):
         if not os.path.exists(self.config['replay_data_path']):

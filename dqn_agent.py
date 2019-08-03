@@ -22,10 +22,9 @@ class DQNAgent:
         self.memory = deque(maxlen=3000)
         self.gamma = 0.95    # discount rate
         self.epsilon = 1.0  # exploration rate
-        self.epsilon_min = 0.01
-        self.epsilon_decay = 0.995
+        self.epsilon_min = 0.1
+        self.epsilon_decay = 0.9995
         self.learning_rate = 0.001
-        self.update_target_freq = 5
         self.batch_size = config['batch_size']
         self.model = self._build_model()
         self.target_model = self._build_model()
@@ -75,7 +74,7 @@ class DQNAgent:
         
         states = np.reshape(np.array(states), [-1, self.state_size])
         q_targets = np.reshape(np.array(q_targets), [-1, self.action_size])
-        self.model.fit(state, target_f, epochs=1, verbose=0) # batch training
+        self.model.fit(state, target_f, epochs=3, verbose=0) # batch training
         
 
         if self.epsilon > self.epsilon_min:
