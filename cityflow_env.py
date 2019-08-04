@@ -107,22 +107,22 @@ class CityFlowEnv(object):
     #     reward = -1 * max(list(lane_vehicle_count.values()))
     #     return reward
 
-    def get_reward(self):
-        '''
-        max vehicle count of all start lanes
-        '''
-        start_lane_vehicle_count = {lane: self.eng.get_lane_vehicle_count()[lane] for lane in self.start_lane}
-        reward = -1 * max(list(start_lane_vehicle_count.values()))
-        return reward
-
     # def get_reward(self):
     #     '''
-    #     max waiting vehicle count of the lanes, *-1
+    #     max vehicle count of all start lanes
     #     '''
-    #     lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()
-    #     lane_waiting_vehicle_count_list = list(lane_waiting_vehicle_count.values())
-    #     reward = -1 * ( sum(lane_waiting_vehicle_count_list)/len(lane_waiting_vehicle_count_list) + max(lane_waiting_vehicle_count_list) )
+    #     start_lane_vehicle_count = {lane: self.eng.get_lane_vehicle_count()[lane] for lane in self.start_lane}
+    #     reward = -1 * max(list(start_lane_vehicle_count.values()))
     #     return reward
+
+    def get_reward(self):
+        '''
+        max waiting vehicle count of the lanes, *-1
+        '''
+        lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()
+        lane_waiting_vehicle_count_list = list(lane_waiting_vehicle_count.values())
+        reward = -1 * ( sum(lane_waiting_vehicle_count_list)/len(lane_waiting_vehicle_count_list)  )
+        return reward
     
     # def get_reward(self):
     #     '''
