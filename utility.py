@@ -68,9 +68,10 @@ def plot_data_lists(data_list,
     plot this datas in one plot
     '''
     import matplotlib
-    import matplotlib.pyplot as plt
     if save:
         matplotlib.use('PDF')
+    import matplotlib.pyplot as plt
+    
 
     fig, ax = plt.subplots(figsize=(length, height))
     ax.grid(True)
