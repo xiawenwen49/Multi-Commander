@@ -67,9 +67,9 @@ def main():
     # batch_size = 32
     EPISODES = args.epoch
     learning_start = 300
-    update_model_freq = args.batch_size
-    # update_model_freq = 1
-    update_target_model_freq = 1
+    # update_model_freq = args.batch_size
+    update_model_freq = 1
+    update_target_model_freq = 10
 
     if not args.inference:
         # build cityflow environment
