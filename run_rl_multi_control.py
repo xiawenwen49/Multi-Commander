@@ -16,7 +16,7 @@ from dqn_agent import DQNAgent, DDQNAgent, MDQNAgent
 from duelingDQN import DuelingDQNAgent
 # import ray
 
-# os.environ["CUDA_VISIBLE_DEVICES"]="0" # use GPU
+os.environ["CUDA_VISIBLE_DEVICES"]="0, 1, 2, 3" # use GPU
 
 def main():
     logging.getLogger().setLevel(logging.INFO)
