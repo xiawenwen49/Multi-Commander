@@ -4,6 +4,7 @@ import os
 import json
 import math
 import numpy as np
+import itertools
 # from sim_setting import sim_setting_control
 
 class CityFlowEnv(object):
@@ -105,13 +106,13 @@ class CityFlowEnv(object):
     #     reward = -1 * max(list(lane_vehicle_count.values()))
     #     return reward
 
-    def get_reward(self):
-        '''
-        max vehicle count of all start lanes
-        '''
-        start_lane_vehicle_count = {lane: self.eng.get_lane_vehicle_count()[lane] for lane in self.start_lane}
-        reward = -1 * np.mean(list(start_lane_vehicle_count.values()))
-        return reward
+    # def get_reward(self):
+    #     '''
+    #     max vehicle count of all start lanes
+    #     '''
+    #     start_lane_vehicle_count = {lane: self.eng.get_lane_vehicle_count()[lane] for lane in self.start_lane}
+    #     reward = -1 * np.mean(list(start_lane_vehicle_count.values()))
+    #     return reward
 
     # def get_reward(self):
     #     '''
@@ -122,14 +123,16 @@ class CityFlowEnv(object):
     #     reward = -1 * ( sum(lane_waiting_vehicle_count_list)/len(lane_waiting_vehicle_count_list)  )
     #     return reward
     
-    # def get_reward(self):
-    #     '''
-    #     mean speed of all lanes
-    #     '''
-    #     lane_vehicle_count = self.eng.get_lane_vehicle_count()
-    #     vehicle_velocity = self.eng.get_vehicle_speed()
-    #     reward = sum(list(vehicle_velocity.values())) / (sum(list(lane_vehicle_count.values())) + 1e-5)
-    #     return reward
+    def get_reward(self):
+        '''
+        mean speed of start lanes
+        '''
+        start_lane_vehicles = [self.eng.get_lane_vehicles()[lane] for lane in self.start_lane]
+        start_lane_vehicles = list(itertools.chain(*start_lane_vehicles))
+        vehicle_speed = self.eng.get_vehicle_speed()
+        start_lane_vehicles_speed = [vehicle_speed[v] for v in start_lane_vehicles]
+        reward = np.mean(start_lane_vehicles_speed)
+        return reward
 
     # def get_reward(self):
     #     '''
