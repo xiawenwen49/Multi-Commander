@@ -29,7 +29,7 @@ def main():
     parser.add_argument('--ckpt', type=str, help='inference or training')
     parser.add_argument('--epoch', type=int, default=10, help='number of training epochs')
     parser.add_argument('--num_step', type=int, default=1500, help='number of timesteps for one episode, and for inference')
-    parser.add_argument('--save_freq', type=int, default=100, help='model saving frequency')
+    parser.add_argument('--save_freq', type=int, default=10, help='model saving frequency')
     parser.add_argument('--batch_size', type=int, default=64, help='batchsize for training')
     parser.add_argument('--phase_step', type=int, default=1, help='seconds of one phase')
     
@@ -124,7 +124,7 @@ def main():
                         score[id_] /= args.phase_step
 
                     for id_ in intersection_id:
-                        episode_reward[id_] += reward[id_]/args.num_step
+                        episode_reward[id_] += reward[id_]
                         episode_score[id_] += score[id_]
 
                     episode_length += 1
@@ -153,12 +153,17 @@ def main():
                         "total_step:{}, episode:{}, episode_step:{}, reward:{}".format(total_step, i+1, episode_length, reward))
 
 
+                # compute episode mean reward
+                for id_ in intersection_id:
+                    episode_reward[id_] /= episode_reward[id_]/args.num_step
+                
                 # save episode rewards
                 for id_ in intersection_id:
                     episode_rewards[id_].append(episode_reward[id_])
                     episode_scores[id_].append(episode_score[id_])
-
-                logging.info("Episode:{}, Mean reward:{}, Score: {}".format(i+1, episode_reward, episode_score))
+                
+                print('\n')
+                print("Episode:{}, Mean reward:{}, Score: {}".format(i+1, episode_reward, episode_score))
 
                 # save model
                 if (i + 1) % args.save_freq == 0:
@@ -183,17 +188,16 @@ def main():
     else: # inference
         Magent.load(args.ckpt)   
         
-        episode_reward = {id_:0 for id_ in intersection_id} # for every agent
-        episode_score = {id_:0 for id_ in intersection_id} # for everg agent
+        episode_reward = {id_:[] for id_ in intersection_id} # for every agent
+        episode_score = {id_:[] for id_ in intersection_id} # for everg agent
 
         state = env.get_state()
         for i in range(args.num_step): 
             action = Magent.choose_action(state) # index of action
             action_phase = {}
 
-            
             for id_, a in action.items():
-                action_phase[id_] = phase_list[a]
+                action_phase[id_] = phase_list[id_][a]
 
             # one step #####  
             next_state, reward = env.step(action_phase) # one step
@@ -220,10 +224,14 @@ def main():
             logging.info("step:{}/{}, action:{}, reward:{}, score:{}"
                             .format(i+1, args.num_step, action, reward, score))
         
+        mean_reward = {}
+        mean_score = {}
         for id_ in intersection_id:
-            episode_reward[id_] = np.mean(episode_reward[id_])
-            episode_score[id_] = np.mean(episode_score)
-        logging.info("[Inference] Mean reward:{}, Mean score:{},".format(reward, score))
+            mean_reward[id_] = np.mean(episode_reward[id_])
+            mean_score[id_] = np.mean(episode_score[id_])
+        print('\n')
+        print("[Inference] Mean reward:{}, Mean score:{},".format(mean_reward, mean_score))
+        # logging.info('hello')
 
         # inf_result_dir = "result/" + args.ckpt.split("/")[1] 
         # df = pd.DataFrame(scores})

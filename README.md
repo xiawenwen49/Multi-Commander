@@ -43,7 +43,7 @@ open firefox with the url: http://localhost:8080/?roadnetFile=roadnet.json&logFi
 ```
 
 
-### Multiple intersection signal control
+### Multiple intersections signal control
 
 **Training**
 
@@ -56,5 +56,4 @@ python run_rl_multi_control.py --algo MDQN --epoch 10 --num_step 1500 --phase_st
 
 *DQN*
 ```
-python run_rl_multi_control.py --algo MDQN --inference --num_step 3000 --ckpt model/DQN_20190803_150924/DQN-200.h5
-```
+python run_rl_multi_control.py --algo MDQN --inference --num_step 1500 --ckpt model/MDQN_20190804_155422/MDQN-10.h5
