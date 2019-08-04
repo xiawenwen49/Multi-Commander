@@ -31,7 +31,7 @@ def main():
     parser.add_argument('--num_step', type=int, default=1500, help='number of timesteps for one episode, and for inference')
     parser.add_argument('--save_freq', type=int, default=100, help='model saving frequency')
     parser.add_argument('--batch_size', type=int, default=64, help='batchsize for training')
-    parser.add_argument('--phase_step', type=int, default=1, help='seconds of one phase')
+    parser.add_argument('--phase_step', type=int, default=15, help='seconds of one phase')
     
     args = parser.parse_args()
 
