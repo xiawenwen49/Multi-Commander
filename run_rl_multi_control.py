@@ -149,8 +149,9 @@ def main():
                     # logging
                     # logging.info("\repisode:{}/{}, total_step:{}, action:{}, reward:{}"
                     #             .format(i+1, EPISODES, total_step, action, reward))
+                    print_reward = {'_'.join(k.split('_')[1:]):v for k, v in reward.items()}
                     pbar.set_description(
-                        "t_st:{}, epi:{}, st:{}, r:{}".format(total_step, i+1, episode_length, reward))
+                        "t_st:{}, epi:{}, st:{}, r:{}".format(total_step, i+1, episode_length, print_reward))
 
 
                 # compute episode mean reward
