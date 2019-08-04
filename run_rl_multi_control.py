@@ -156,15 +156,17 @@ def main():
 
                 # compute episode mean reward
                 for id_ in intersection_id:
-                    episode_reward[id_] /= episode_reward[id_]/args.num_step
+                    episode_reward[id_] /= args.num_step
                 
                 # save episode rewards
                 for id_ in intersection_id:
                     episode_rewards[id_].append(episode_reward[id_])
                     episode_scores[id_].append(episode_score[id_])
                 
+                print_episode_reward = {'_'.join(k.split('_')[1:]):v for k, v in episode_reward.items()}
+                print_episode_score = {'_'.join(k.split('_')[1:]):v for k, v in episode_score.items()}
                 print('\n')
-                print("Episode:{}, Mean reward:{}, Score: {}".format(i+1, episode_reward, episode_score))
+                print("Episode:{}, Mean reward:{}, Score: {}".format(i+1, print_episode_reward, print_episode_score))
 
                 # save model
                 if (i + 1) % args.save_freq == 0:
