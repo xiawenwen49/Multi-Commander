@@ -3,7 +3,8 @@ Multi-agent signal control
 
 Implementation of DQN, Double DQN and Dueling DQN
 
-### usage
+## usage
+### Single agent for single intersection
 **Training**
 
 *DQN*
@@ -42,3 +43,18 @@ open firefox with the url: http://localhost:8080/?roadnetFile=roadnet.json&logFi
 ```
 
 
+### Multiple intersection signal control
+
+**Training**
+
+*DQN*
+```
+python run_rl_multi_control.py --algo MDQN --epoch 10 --num_step 1500 --phase_step 1
+```
+
+**Inference**
+
+*DQN*
+```
+python run_rl_multi_control.py --algo MDQN --inference --num_step 3000 --ckpt model/DQN_20190803_150924/DQN-200.h5
+```

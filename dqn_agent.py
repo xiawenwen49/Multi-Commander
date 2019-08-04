@@ -13,25 +13,32 @@ import tensorflow as tf
 import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
-KTF.set_session(tf.Session(config=tf.ConfigProto(device_count={'gpu':0})))
+# KTF.set_session(tf.Session(config=tf.ConfigProto(device_count={'gpu':0})))
 
-class DQNAgent:
-    def __init__(self, config):
-        self.state_size = config['state_size']
-        self.action_size = config['action_size']
+class DQNAgent(object):
+    def __init__(self, 
+            intersection_id,
+            state_size=9,
+            action_size=8,
+            batch_size=32,
+            phase_list=[]
+            ):
+        
+        self.intersection_id = intersection_id
+        self.state_size = state_size
+        self.action_size = action_size
         self.memory = deque(maxlen=3000)
         self.gamma = 0.95    # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.1
         self.epsilon_decay = 0.9995
         self.learning_rate = 0.001
-        self.batch_size = config['batch_size']
+        self.batch_size = batch_size
         self.model = self._build_model()
         self.target_model = self._build_model()
         self.update_target_network()
-
-        intersection_id = list(config['lane_phase_info'].keys())[0]
-        self.phase_list = config['lane_phase_info'][intersection_id]['phase']
+        
+        self.phase_list = phase_list
 
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
@@ -56,6 +63,10 @@ class DQNAgent:
             return random.randrange(self.action_size)
         act_values = self.model.predict(state)
         return np.argmax(act_values[0])  # returns action
+
+    # def choose_action(self, state):
+    #     action = state
+        
 
     def replay(self):
         minibatch = random.sample(self.memory, self.batch_size)
@@ -123,5 +134,54 @@ class DDQNAgent(DQNAgent):
         if self.epsilon > self.epsilon_min:
             self.epsilon = self.epsilon_decay
 
+class MDQNAgent(object):
+    def __init__(self,
+        intersection, 
+        state_size=17,
+        batch_size=32,
+        phase_list={},
+        env=None):
+        
+        self.env = env
+        self.intersection = intersection
+        self.agents =  {}
+        self.make_agents(intersection, state_size, batch_size, phase_list)
+
+    def make_agents(self, intersection, state_size, batch_size, phase_list):
+        for id_ in self.intersection: 
+            self.agents[id_] = DQNAgent(id_, 
+                                state_size=state_size,
+                                action_size=len(phase_list[id_]),
+                                batch_size=batch_size,
+                                phase_list=phase_list[id_])
+
+    def update_target_network(self):
+        for id_ in self.intersection:
+            self.agents[id_].update_target_network()
+
+    def remember(self, state, action, reward, next_state):
+        for id_ in self.intersection:
+            self.agents[id_].remember(state[id_],
+                                    action[id_],
+                                    reward[id_],
+                                    next_state[id_])
     
+    def choose_action(self, state):
+        action = {}
+        for id_ in self.intersection:
+            action[id_] = self.agents[id_].choose_action(state[id_])
+        return action
+
+    def replay(self):
+        for id_ in self.intersection:
+            self.agents[id_].replay()
+
+    def load(self, name):
+        for id_ in self.intersection:
+            assert os.path.exists(name + '.' + id_), "Wrong checkpoint, file not exists!"
+            self.agents[id_].load(name + '.' + id_)
+
+    def save(self, name):
+        for id_ in self.intersection:
+            self.agents[id_].save(name + '.' + id_)
 

@@ -40,6 +40,7 @@ def main():
     config = json.load(open(args.config))
     config["num_step"] = args.num_step
     
+    assert "1x1" in config['cityflow_config_file'], "please use 1x1 config file for cityflow"
 
     # config["replay_data_path"] = "replay"
     cityflow_config = json.load(open(config['cityflow_config_file']))
@@ -49,8 +50,6 @@ def main():
     # # for agent
     intersection_id = list(config['lane_phase_info'].keys())[0]
     config["intersection_id"] = intersection_id
-    # config["state_size"] = len(config['lane_phase_info'][config["intersection_id"]]['start_lane']) + 1
-    # config["state_size"] = len(config['lane_phase_info'][config["intersection_id"]]['start_lane']) + 1 + 4
 
     phase_list = config['lane_phase_info'][config["intersection_id"]]['phase']
     config["action_size"] = len(phase_list)
@@ -76,12 +75,22 @@ def main():
         # build cityflow environment
         cityflow_config["saveReplay"] = False
         json.dump(cityflow_config, open(config["cityflow_config_file"], 'w'))
-        env = CityFlowEnv(config)
+        env = CityFlowEnv(
+            lane_phase_info=config["lane_phase_info"],
+            intersection_id=config["intersection_id"], # for single agent
+            num_step=args.num_step,
+            cityflow_config_file = config["cityflow_config_file"]
+            )
 
         # build agent
         config["state_size"] = env.state_size
         if args.algo == 'DQN':
-            agent = DQNAgent(config)
+            agent = DQNAgent(intersection_id,
+                            state_size=config["state_size"],
+                            action_size=config["action_size"],
+                            batch_size=config["batch_size"],
+                            phase_list=phase_list)
+        
         elif args.algo == 'DDQN':
             agent = DDQNAgent(config)
         elif args.algo == 'DuelDQN':
@@ -102,7 +111,6 @@ def main():
         episode_rewards = []
         episode_scores = []
         with tqdm(total=EPISODES*args.num_step) as pbar:
-            
             for i in range(EPISODES):
                 # print("episode: {}".format(i))
                 env.reset()
@@ -181,13 +189,23 @@ def main():
         # inference
         cityflow_config["saveReplay"] = True
         json.dump(cityflow_config, open(config["cityflow_config_file"], 'w'))
-        env = CityFlowEnv(config)
+        env = CityFlowEnv(
+            lane_phase_info=config["lane_phase_info"],
+            intersection_id=config["intersection_id"], # for single agent
+            num_step=args.num_step,
+            cityflow_config_file = config["cityflow_config_file"]
+            )
         env.reset()
 
         # build agent
         config["state_size"] = env.state_size
         if args.algo == 'DQN':
-            agent = DQNAgent(config)
+            agent = DQNAgent(intersection_id,
+                            state_size=config["state_size"],
+                            action_size=config["action_size"],
+                            batch_size=config["batch_size"],
+                            phase_list=phase_list)
+                        
         elif args.algo == 'DDQN':
             agent = DDQNAgent(config)
         elif args.algo == 'DuelDQN':
