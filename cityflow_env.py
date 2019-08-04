@@ -18,7 +18,6 @@ class CityFlowEnv(object):
         # cityflow_config['rlTrafficLight'] = rl_control # use RL to control the light or not
         self.eng = cityflow.Engine(cityflow_config_file, thread_num=thread_num)
         self.num_step = num_step
-
         self.state_size = None
         self.lane_phase_info = lane_phase_info # "intersection_1_1"
         self.intersection_id = intersection_id
@@ -27,7 +26,6 @@ class CityFlowEnv(object):
         self.phase_startLane_mapping = self.lane_phase_info[self.intersection_id]["phase_startLane_mapping"]
 
         self.replay_data_path = replay_data_path
-
         self.current_phase = self.phase_list[0]
         self.current_phase_time = 0
         self.yellow_time = 5
@@ -158,13 +156,10 @@ class CityFlowEnv(object):
     def log(self):
         if not os.path.exists(self.replay_data_path):
             os.makedirs(self.replay_data_path)
-        
         # self.eng.print_log(self.config['replay_data_path'] + "/replay_roadnet.json",
         #                    self.config['replay_data_path'] + "/replay_flow.json")
-
         df = pd.DataFrame({self.intersection_id: self.phase_log[:self.num_step]})
         df.to_csv(os.path.join(self.replay_data_path, 'signal_plan.txt'), index=None)
-
 
 class CityFlowEnvM(object):
     '''
@@ -199,7 +194,6 @@ class CityFlowEnvM(object):
             self.phase_list[id_] = self.lane_phase_info[id_]["phase"]
             self.current_phase[id_] = self.phase_list[id_][0]
             self.current_phase_time[id_] = 0
-        
         self.get_state() # set self.state_size
         
     def reset(self):
@@ -215,17 +209,12 @@ class CityFlowEnvM(object):
             else:
                 self.current_phase[id_] = a
                 self.current_phase_time[id_] = 1
-
             self.eng.set_tl_phase(id_, self.current_phase[id_]) # set phase of traffic light
-        
         self.eng.next_step()
         return self.get_state(), self.get_reward()
 
-
     def get_state(self):
-        state = {}
-        for id_ in self.intersection_id:
-            state[id_] = self.get_state_(id_)
+        state =  {id_: self.get_state_(id_) for id_ in self.intersection_id}
         return state
 
     def get_state_(self, id_):
@@ -278,9 +267,7 @@ class CityFlowEnvM(object):
         return return_state
 
     def get_reward(self):
-        reward = {}
-        for id_ in self.intersection_id:
-            reward[id_] = self.get_reward_(id_)
+        reward = {id_: self.get_reward_(id_) for id_ in self.intersection_id}
         return reward
 
     def get_reward_(self, id_):
@@ -289,14 +276,11 @@ class CityFlowEnvM(object):
         '''
         state = self.intersection_info(id_)
         start_lane_waiting_vehicle_count = state['start_lane_waiting_vehicle_count']
-
         reward = -1 * np.sum(list(start_lane_waiting_vehicle_count.values()))
         return reward
 
     def get_score(self):
-        score = {}
-        for id_ in self.intersection_id:
-            score[id_] = self.get_score_(id_)
+        score = {id_: self.get_score_(id_) for id_ in self.intersection_id}
         return score
     
     def get_score_(self, id_):
