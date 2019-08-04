@@ -283,12 +283,6 @@ class CityFlowEnvM(object):
             reward[id_] = self.get_reward_(id_)
         return reward
 
-    def get_score(self):
-        score = {}
-        for id_ in self.intersection_id:
-            score[id_] = self.get_score_(id_)
-        return score
-
     def get_reward_(self, id_):
         '''
         every agent/intersection's reward
@@ -296,9 +290,14 @@ class CityFlowEnvM(object):
         state = self.intersection_info(id_)
         start_lane_waiting_vehicle_count = state['start_lane_waiting_vehicle_count']
 
-        reward = -1 * np.max(list(start_lane_waiting_vehicle_count.values()))
+        reward = -1 * np.sum(list(start_lane_waiting_vehicle_count.values()))
         return reward
 
+    def get_score(self):
+        score = {}
+        for id_ in self.intersection_id:
+            score[id_] = self.get_score_(id_)
+        return score
     
     def get_score_(self, id_):
         state = self.intersection_info(id_)

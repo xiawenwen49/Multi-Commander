@@ -224,7 +224,7 @@ def main():
             
             state = next_state
 
-            logging.info("step:{}/{}, action:{}, reward:{}, score:{}"
+            print("step:{}/{}, action:{}, reward:{}, score:{}"
                             .format(i+1, args.num_step, action, reward, score))
         
         mean_reward = {}
