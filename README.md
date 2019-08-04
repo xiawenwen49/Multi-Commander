@@ -49,7 +49,7 @@ open firefox with the url: http://localhost:8080/?roadnetFile=roadnet.json&logFi
 
 *DQN*
 ```
-python run_rl_multi_control.py --algo MDQN --epoch 10 --num_step 1500 --phase_step 1
+python run_rl_multi_control.py --algo MDQN --epoch 1000 --num_step 1500 --phase_step 1
 ```
 
 **Inference**
