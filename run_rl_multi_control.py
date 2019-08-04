@@ -7,13 +7,11 @@ from datetime import datetime
 from tqdm import tqdm
 import pandas as pd
 
-
 import cityflow
-from cityflow_env import CityFlowEnv, CityFlowEnvM
+from cityflow_env import CityFlowEnvM
 # from test.cityflow_env import CityFlowEnv
 from utility import parse_roadnet, plot_data_lists
-from dqn_agent import DQNAgent, DDQNAgent, MDQNAgent
-from duelingDQN import DuelingDQNAgent
+from dqn_agent import MDQNAgent
 # import ray
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0, 1, 2, 3" # use GPU
@@ -23,7 +21,7 @@ def main():
     date = datetime.now().strftime('%Y%m%d_%H%M%S')
     parser = argparse.ArgumentParser()
     # parser.add_argument('--scenario', type=str, default='PongNoFrameskip-v4')
-    parser.add_argument('--config', type=str, default='config/global_config.json', help='config file')
+    parser.add_argument('--config', type=str, default='config/global_config_multi.json', help='config file')
     parser.add_argument('--algo', type=str, default='MDQN', choices=['MDQN',], help='choose an algorithm')
     parser.add_argument('--inference', action="store_true", help='inference or training')
     parser.add_argument('--ckpt', type=str, help='inference or training')
@@ -146,13 +144,11 @@ def main():
                     if episode_length > learning_start and total_step % update_target_model_freq == 0 :
                         Magent.update_target_network()
 
-                    # logging
                     # logging.info("\repisode:{}/{}, total_step:{}, action:{}, reward:{}"
                     #             .format(i+1, EPISODES, total_step, action, reward))
                     print_reward = {'_'.join(k.split('_')[1:]):v for k, v in reward.items()}
                     pbar.set_description(
                         "t_st:{}, epi:{}, st:{}, r:{}".format(total_step, i+1, episode_length, print_reward))
-
 
                 # compute episode mean reward
                 for id_ in intersection_id:
@@ -174,14 +170,12 @@ def main():
                         # Magent.save(model_dir + "/{}-ckpt".format(args.algo), i+1)
                         Magent.save(model_dir + "/{}-{}.h5".format(args.algo, i+1))
                         
-            
                     # save reward to file
                     df = pd.DataFrame(episode_rewards)
                     df.to_csv(result_dir + '/rewards.csv', index=None)
 
                     df = pd.DataFrame(episode_scores)
                     df.to_csv(result_dir + '/scores.csv', index=None)
-
 
                     # save figure
                     plot_data_lists([episode_rewards[id_] for id_ in intersection_id], intersection_id, figure_name=result_dir + '/rewards.pdf')
