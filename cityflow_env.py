@@ -131,7 +131,7 @@ class CityFlowEnv(object):
         start_lane_vehicles = list(itertools.chain(*start_lane_vehicles))
         vehicle_speed = self.eng.get_vehicle_speed()
         start_lane_vehicles_speed = [vehicle_speed[v] for v in start_lane_vehicles]
-        reward = np.mean(start_lane_vehicles_speed)
+        reward = sum(start_lane_vehicles_speed)/(len(start_lane_vehicles_speed) + 1e-5)
         return reward
 
     # def get_reward(self):
