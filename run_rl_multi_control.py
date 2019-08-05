@@ -27,7 +27,7 @@ def main():
     parser.add_argument('--ckpt', type=str, help='inference or training')
     parser.add_argument('--epoch', type=int, default=10, help='number of training epochs')
     parser.add_argument('--num_step', type=int, default=1500, help='number of timesteps for one episode, and for inference')
-    parser.add_argument('--save_freq', type=int, default=10, help='model saving frequency')
+    parser.add_argument('--save_freq', type=int, default=1, help='model saving frequency')
     parser.add_argument('--batch_size', type=int, default=32, help='batchsize for training')
     parser.add_argument('--phase_step', type=int, default=15, help='seconds of one phase')
     
@@ -55,7 +55,7 @@ def main():
     # parameters for training and inference
     EPISODES = args.epoch
     learning_start = 300
-    update_model_freq = args.batch_size
+    update_model_freq = args.batch_size//3
     update_target_model_freq = 300//args.phase_step
 
     # make dirs

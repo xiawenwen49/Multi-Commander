@@ -57,3 +57,6 @@ python run_rl_multi_control.py --algo MDQN --epoch 1000 --num_step 500 --phase_s
 *DQN*
 ```
 python run_rl_multi_control.py --algo MDQN --inference --num_step 1500 --ckpt model/MDQN_20190804_155422/MDQN-10.h5
+
+python run_rl_multi_control.py --algo MDQN --inference --num_step 1500  --phase_step 2 --ckpt model/MDQN_20190805_120454/MDQN-1.h5
+```

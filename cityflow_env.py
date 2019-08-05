@@ -23,6 +23,8 @@ class CityFlowEnv(object):
         self.lane_phase_info = lane_phase_info # "intersection_1_1"
         self.intersection_id = intersection_id
         self.start_lane = self.lane_phase_info[self.intersection_id]['start_lane']
+        self.end_lane = self.lane_phase_info[self.intersection_id]['end_lane']
+
         self.phase_list = self.lane_phase_info[self.intersection_id]["phase"]
         self.phase_startLane_mapping = self.lane_phase_info[self.intersection_id]["phase_startLane_mapping"]
 
@@ -68,10 +70,6 @@ class CityFlowEnv(object):
         result = [lane_mean_speed[key] for key in sorted(lane_mean_speed.keys())]
         return result
 
-    # def get_state(self):
-    #     state = self.get_each_lane_speed() + [self.current_phase]
-    #     return self.preprocess_state(state)
-
     def get_state(self):
         state = {}
         state['lane_vehicle_count'] = self.eng.get_lane_vehicle_count()  # {lane_id: lane_count, ...}
@@ -94,7 +92,6 @@ class CityFlowEnv(object):
             self.state_size = len(return_state.flatten())
         return_state = np.reshape(return_state, [1, self.state_size])
         return return_state
-
 
     # def get_reward(self):
     #     '''

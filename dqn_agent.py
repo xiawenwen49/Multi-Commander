@@ -21,9 +21,10 @@ class DQNAgent(object):
             state_size=9,
             action_size=8,
             batch_size=32,
-            phase_list=[]
+            phase_list=[],
+            env=None
             ):
-        
+        self.env = env
         self.intersection_id = intersection_id
         self.state_size = state_size
         self.action_size = action_size
@@ -65,8 +66,19 @@ class DQNAgent(object):
         return np.argmax(act_values[0])  # returns action
 
     def choose_action_(self, state):
-        action = state
+        '''
+        choose phase with max waiting count in its start lanes
+        '''
+        intersection_info = self.env.intersection_info(self.intersection_id)
+        phase_waiting_count = self.phase_list.copy()
+        for index, phase in enumerate(self.phase_list):
+            phase_start_lane = self.env.phase_startLane_mapping[self.intersection_id][phase] # {0:['road_0_1_1_1',], 1:[]...}
+            phase_start_lane_waiting_count = [intersection_info["start_lane_vehicle_count"][lane] for lane  in phase_start_lane] # [num1, num2, ...]
+            sum_count = sum(phase_start_lane_waiting_count)
+            phase_waiting_count[index] = sum_count
         
+        action = np.argmax(phase_waiting_count)
+        return action
 
     def replay(self):
         minibatch = random.sample(self.memory, self.batch_size)
@@ -86,7 +98,6 @@ class DQNAgent(object):
         states = np.reshape(np.array(states), [-1, self.state_size])
         q_targets = np.reshape(np.array(q_targets), [-1, self.action_size])
         self.model.fit(state, target_f, epochs=2, verbose=0) # batch training
-        
 
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
@@ -142,18 +153,18 @@ class MDQNAgent(object):
         phase_list={},
         env=None):
         
-        self.env = env
         self.intersection = intersection
         self.agents =  {}
-        self.make_agents(intersection, state_size, batch_size, phase_list)
+        self.make_agents(intersection, state_size, batch_size, phase_list, env)
 
-    def make_agents(self, intersection, state_size, batch_size, phase_list):
+    def make_agents(self, intersection, state_size, batch_size, phase_list, env):
         for id_ in self.intersection: 
             self.agents[id_] = DQNAgent(id_, 
                                 state_size=state_size,
                                 action_size=len(phase_list[id_]),
                                 batch_size=batch_size,
-                                phase_list=phase_list[id_]
+                                phase_list=phase_list[id_],
+                                env=env
                                 )
 
     def update_target_network(self):
@@ -170,7 +181,7 @@ class MDQNAgent(object):
     def choose_action(self, state):
         action = {}
         for id_ in self.intersection:
-            action[id_] = self.agents[id_].choose_action(state[id_])
+            action[id_] = self.agents[id_].choose_action_(state[id_])
         return action
 
     def replay(self):
