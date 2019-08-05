@@ -73,7 +73,7 @@ def main():
 
     if not args.inference:
         # build cityflow environment
-        cityflow_config["saveReplay"] = False
+        cityflow_config["saveReplay"] = True
         json.dump(cityflow_config, open(config["cityflow_config_file"], 'w'))
         env = CityFlowEnv(
             lane_phase_info=config["lane_phase_info"],
