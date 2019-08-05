@@ -101,7 +101,8 @@ class CityflowGymEnv(gym.Env):
         # reward function
         lane_vehicle_count = mystate[0:8]
         vehicle_velocity = self.eng.get_vehicle_speed()
-        reward = sum(list(vehicle_velocity.values())) / (sum(lane_vehicle_count) + 1e-5)
+        # reward = sum(list(vehicle_velocity.values())) / (sum(lane_vehicle_count) + 1e-5)
+        reward = np.mean(list(vehicle_velocity.values()))
         # reward = float(-max(list(lane_vehicle_count)))
         # reward_sig = 2 / ((1 + math.exp(-1 * reward)))
         if np.isnan(reward):
