@@ -61,6 +61,7 @@ class CityflowGymEnv(gym.Env):
         done = 0
         if self.step_count > 999:
             done = 1
+        self.step_count += 1
         return self.get_state(), self.get_reward(), done, {}  # return next_state and reward, whether done and info
 
     def get_state(self):
@@ -100,14 +101,9 @@ class CityflowGymEnv(gym.Env):
         # reward function
         lane_vehicle_count = mystate[0:8]
         vehicle_velocity = self.eng.get_vehicle_speed()
-        # reward = sum(list(vehicle_velocity.values())) / sum(lane_vehicle_count)
-        reward = float(-max(list(lane_vehicle_count)))
+        reward = sum(list(vehicle_velocity.values())) / sum(lane_vehicle_count)
+        # reward = float(-max(list(lane_vehicle_count)))
         # reward_sig = 2 / ((1 + math.exp(-1 * reward)))
-        self.step_count += 1
-        # self.avg_reward += reward
-        # if self.step_count is 1000:
-        #     print("!!!!" + str(self.avg_reward) + "!!!!!")
-
         if np.isnan(reward):
             reward = 1
         return reward
