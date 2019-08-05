@@ -1,3 +1,6 @@
+'''
+multiple intersection, independent dqn/rule based policy
+'''
 import argparse
 import json
 import logging
@@ -228,7 +231,6 @@ def main():
             mean_score[id_] = np.mean(episode_score[id_])
         print('\n')
         print("[Inference] Mean reward:{}, Mean score:{},".format(mean_reward, mean_score))
-        # logging.info('hello')
 
         # inf_result_dir = "result/" + args.ckpt.split("/")[1] 
         # df = pd.DataFrame(scores})

@@ -61,8 +61,6 @@ def main():
     result_dir = "result/{}_{}".format(args.algo, date)
     config["result_dir"] = result_dir
 
-    
-
     # parameters for training and inference
     # batch_size = 32
     EPISODES = args.epoch
@@ -122,7 +120,7 @@ def main():
                 episode_score = 0
                 while episode_length < args.num_step:
                     
-                    action = agent.choose_action(state) # index of action
+                    action = agent.choose_action_(state) # index of action
                     action_phase = phase_list[action] # actual action
                     # no yellow light
                     next_state, reward = env.step(action_phase) # one step

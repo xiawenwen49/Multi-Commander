@@ -48,9 +48,6 @@ def agent_config(config_env):
     config["env_config"] = config_env
     return config
 
-# def get_episode_reward(info):
-#     episode=info
-
 
 def main():
     ray.init()
@@ -63,7 +60,7 @@ def main():
                         help='choose an algorithm')
     parser.add_argument('--inference', action="store_true", help='inference or training')
     parser.add_argument('--ckpt', type=str, help='inference or training')
-    parser.add_argument('--epoch', type=int, default=10, help='number of training epochs')
+    parser.add_argument('--epoch', type=int, default=100, help='number of training epochs')
     parser.add_argument('--num_step', type=int, default=10 ** 3,
                         help='number of timesteps for one episode, and for inference')
     parser.add_argument('--save_freq', type=int, default=100, help='model saving frequency')
@@ -73,16 +70,11 @@ def main():
 
     args = parser.parse_args()
 
-    model_dir = "model/{}_{}".format(args.algo, date)
-    result_dir = "result/{}_{}".format(args.algo, date)
-
     config_env = env_config(args)
     # ray.tune.register_env('gym_cityflow', lambda env_config:CityflowGymEnv(config_env))
 
     config_agent = agent_config(config_env)
-
-    # # build cityflow environment
-
+    
     trainer = DQNTrainer(
         env=CityflowGymEnv,
         config=config_agent)
@@ -91,12 +83,9 @@ def main():
         result = trainer.train()
         print(pretty_print(result))
 
-        if i % 100 == 0:
+        if (i+1) % 100 == 0:
             checkpoint = trainer.save()
             print("checkpoint saved at", checkpoint)
-
-
-
 
 
 if __name__ == '__main__':

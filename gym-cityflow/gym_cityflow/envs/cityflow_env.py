@@ -1,7 +1,6 @@
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
-#
 import cityflow
 import pandas as pd
 import os
@@ -120,5 +119,3 @@ class CityflowGymEnv(gym.Env):
         self.step_count=0
         return self.get_state()
 
-    # def render(self, mode='human', close=False):
-    #     ...
