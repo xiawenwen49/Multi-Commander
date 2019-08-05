@@ -40,8 +40,8 @@ def env_config(args):
 
 def agent_config(config_env):
     config = dqn.DEFAULT_CONFIG.copy()
-    config["num_gpus"] = 0
-    config["num_workers"] = 1
+    config["num_gpus"] = 1
+    config["num_workers"] = 16
     config["env"] = CityflowGymEnv
     config["env_config"] = config_env
     return config
