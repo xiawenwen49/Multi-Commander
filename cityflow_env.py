@@ -289,7 +289,7 @@ class CityFlowEnvM(object):
         '''
         state = self.intersection_info(id_)
         start_lane_speed = state['start_lane_speed']
-        reward = np.mean(list(start_lane_speed.values()))
+        reward = np.mean(list(start_lane_speed.values())) * 100
         return reward
 
     def get_score(self):
