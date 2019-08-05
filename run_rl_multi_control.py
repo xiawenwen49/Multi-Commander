@@ -54,7 +54,7 @@ def main():
     
     # parameters for training and inference
     EPISODES = args.epoch
-    learning_start = 300//args.phase_step
+    learning_start = 300
     update_model_freq = args.batch_size
     update_target_model_freq = 300//args.phase_step
 
