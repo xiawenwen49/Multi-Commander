@@ -64,8 +64,8 @@ class DQNAgent(object):
         act_values = self.model.predict(state)
         return np.argmax(act_values[0])  # returns action
 
-    # def choose_action(self, state):
-    #     action = state
+    def choose_action_(self, state):
+        action = state
         
 
     def replay(self):
@@ -153,7 +153,8 @@ class MDQNAgent(object):
                                 state_size=state_size,
                                 action_size=len(phase_list[id_]),
                                 batch_size=batch_size,
-                                phase_list=phase_list[id_])
+                                phase_list=phase_list[id_]
+                                )
 
     def update_target_network(self):
         for id_ in self.intersection:

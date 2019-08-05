@@ -222,8 +222,9 @@ class CityFlowEnvM(object):
 
     def get_state_(self, id_):
         state = self.intersection_info(id_)
-        state_dict = state['start_lane_vehicle_count']
-        return_state = [state_dict[key] for key in sorted(state_dict.keys())] + [state['current_phase']]
+        state_dict = state['start_lane_waiting_vehicle_count']
+        sorted_keys = sorted(state_dict.keys())
+        return_state = [state_dict[key] for key in sorted_keys] + [state['current_phase']]
         return self.preprocess_state(return_state)
 
     def intersection_info(self, id_):
@@ -253,8 +254,8 @@ class CityFlowEnvM(object):
         state['start_lane_vehicles'] = {lane: get_lane_vehicles[lane] for lane in self.start_lane[id_]}
         state['end_lane_vehicles'] = {lane: get_lane_vehicles[lane] for lane in self.end_lane[id_]}
         
-        state['start_lane_speed'] = {lane: np.sum(list(map(lambda vehicle:vehicle_speed[vehicle], get_lane_vehicles[lane]))) / np.sum(get_lane_vehicle_count[lane]) for lane in self.start_lane[id_]} # compute start lane mean speed
-        state['end_lane_speed'] = {lane: np.sum(list(map(lambda vehicle:vehicle_speed[vehicle], get_lane_vehicles[lane]))) / np.sum(get_lane_vehicle_count[lane]) for lane in self.end_lane[id_]} # compute end lane mean speed
+        state['start_lane_speed'] = {lane: np.sum(list(map(lambda vehicle:vehicle_speed[vehicle], get_lane_vehicles[lane]))) / get_lane_vehicle_count[lane] for lane in self.start_lane[id_]} # compute start lane mean speed
+        state['end_lane_speed'] = {lane: np.sum(list(map(lambda vehicle:vehicle_speed[vehicle], get_lane_vehicles[lane]))) / get_lane_vehicle_count[lane] for lane in self.end_lane[id_]} # compute end lane mean speed
         
         state['current_phase'] = self.current_phase[id_]
         state['current_phase_time'] = self.current_phase_time[id_]
@@ -273,13 +274,22 @@ class CityFlowEnvM(object):
         reward = {id_: self.get_reward_(id_) for id_ in self.intersection_id}
         return reward
 
+    # def get_reward_(self, id_):
+    #     '''
+    #     every agent/intersection's reward
+    #     '''
+    #     state = self.intersection_info(id_)
+    #     start_lane_waiting_vehicle_count = state['start_lane_waiting_vehicle_count']
+    #     reward = -1 * np.sum(list(start_lane_waiting_vehicle_count.values()))
+    #     return reward
+
     def get_reward_(self, id_):
         '''
         every agent/intersection's reward
         '''
         state = self.intersection_info(id_)
-        start_lane_waiting_vehicle_count = state['start_lane_waiting_vehicle_count']
-        reward = -1 * np.sum(list(start_lane_waiting_vehicle_count.values()))
+        start_lane_speed = state['start_lane_speed']
+        reward = np.mean(list(start_lane_speed.values()))
         return reward
 
     def get_score(self):
