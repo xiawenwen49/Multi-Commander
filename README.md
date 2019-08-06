@@ -44,6 +44,7 @@ open firefox with the url: http://localhost:8080/?roadnetFile=roadnet.json&logFi
 ### Multiple intersections signal control
 
 **Training**
+
 *QMIX (based on Ray)*
 ```
 python ray_multi_agent.py
