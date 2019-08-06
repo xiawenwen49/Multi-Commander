@@ -1,8 +1,6 @@
 # Multi-Commander
 Multi-agent signal control
 
-Implementation of DQN, Double DQN and Dueling DQN
-
 ## usage
 ### Single agent for single intersection
 **Training**
@@ -61,6 +59,7 @@ python run_rl_multi_control.py --algo MDQN --epoch 1000 --num_step 500 --phase_s
 
 ### Rule based
 *1\*6 roadnet*
+
 Generate checkpoint
 ```
 python run_rl_multi_control.py --algo MDQN --epoch 1 --num_step 1 --phase_step 15
