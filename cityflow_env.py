@@ -435,7 +435,7 @@ class CityFlowEnvRay(MultiAgentEnv):
 
     def get_reward(self):
         reward = {id_: self.get_reward_(id_) for id_ in self.intersection_id}
-        mean_global_sum = np.max(list(reward.values()))
+        mean_global_sum = np.min(list(reward.values()))
         # return reward
         reward = {id_:mean_global_sum for id_ in self.intersection_id}
         return reward

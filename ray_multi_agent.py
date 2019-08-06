@@ -83,12 +83,12 @@ def main():
     if args.algo == "QMIX":
         config_ = {
             # "num_workers": 2,
-            "num_gpus_per_worker":1,
+            "num_gpus_per_worker":0,
             "sample_batch_size": 4,
             "num_cpus_per_worker": 4,
             "train_batch_size": 32,
             "exploration_final_eps": 0.0,
-            "num_workers": 1,
+            "num_workers": 0,
             "mixer": grid_search(["qmix"]),
             "env_config":config
         }
