@@ -305,7 +305,7 @@ class CityFlowEnvRay(MultiAgentEnv):
     '''
     multi inersection cityflow environment, for the Ray framework
     '''
-    observation_space = Box(0.0*np.ones((13,)), 20.0*np.ones((13,)))
+    observation_space = Box(0.0*np.ones((13,)), 100*np.ones((13,)))
     action_space = Discrete(8) # num of agents
 
     def __init__(self, config):
