@@ -6,6 +6,8 @@ from ray import tune
 from ray.tune import register_env, grid_search
 import ray.rllib.agents.dqn as dqn
 from ray.rllib.agents.dqn import DQNTrainer
+import ray.rllib.env.group_agents_wrapper
+
 
 from ray.tune.logger import pretty_print
 from gym.spaces import Tuple
@@ -16,7 +18,7 @@ from tqdm import tqdm
 import argparse
 import json
 from cityflow_env import CityFlowEnvRay
-
+import cityflow
 
 parser = argparse.ArgumentParser()
 # parser.add_argument('--scenario', type=str, default='PongNoFrameskip-v4')
@@ -57,9 +59,9 @@ def main():
     config = generate_config(args)
 
     env = CityFlowEnvRay(config)
-    # for i in range(10):
-    #     print(len((list(env.eng.get_lane_vehicle_count().keys()))))
-
+    # eng = cityflow.Engine(config["cityflow_config_file"], thread_num = config["thread_num"])
+    # config["eng"] = [eng,]
+    # print(config["eng"])
     num_agents = len(config["intersection_id"])
     grouping = {
         "group_1":[id_ for id_ in config["intersection_id"]]
@@ -115,7 +117,7 @@ def main():
             "timesteps_total":args.epoch*args.num_step
         },
         config=dict(config_,
-        **{"env":CityFlowEnvRay}),
+        **{"env":"cityflow_multi"}),
     )
 
 
