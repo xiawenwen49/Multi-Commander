@@ -23,7 +23,7 @@ import cityflow
 parser = argparse.ArgumentParser()
 # parser.add_argument('--scenario', type=str, default='PongNoFrameskip-v4')
 parser.add_argument('--config', type=str, default='config/global_config_multi.json', help='config file')
-parser.add_argument('--algo', type=str, default='QMIX', choices=['QMIX', 'APEX_QMIX'],
+parser.add_argument('--algo', type=str, default='APEX_QMIX', choices=['QMIX', 'APEX_QMIX'],
                     help='choose an algorithm')
 parser.add_argument('--inference', action="store_true", help='inference or training')
 parser.add_argument('--ckpt', type=str, help='inference or training')
@@ -61,7 +61,7 @@ def main():
     args = parser.parse_args()
     config = generate_config(args)
 
-    # env = CityFlowEnvRay(config)
+    env = CityFlowEnvRay(config)
     # eng = cityflow.Engine(config["cityflow_config_file"], thread_num = config["thread_num"])
     # config["eng"] = [eng,]
     # print(config["eng"])
