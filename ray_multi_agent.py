@@ -49,6 +49,8 @@ def generate_config(args):
     config["state_time_span"] = args.state_time_span
     config["time_span"] = args.time_span
     config["thread_num"] = 1
+    config["state_time_span"] = args.state_time_span
+    config["time_span"] = args.time_span
     # phase_list = config['lane_phase_info'][intersection_id]['phase']
     # logging.info(phase_list)
     # config["state_size"] = len(config['lane_phase_info'][intersection_id]['start_lane']) + 1 # 1 is for the current phase. [vehicle_count for each start lane] + [current_phase]
@@ -80,8 +82,9 @@ def main():
     if args.algo == "QMIX":
         config_ = {
             # "num_workers": 2,
+            "num_gpus_per_worker":1,
             "sample_batch_size": 4,
-            # "num_cpus_per_worker": 1,
+            "num_cpus_per_worker": 1,
             "train_batch_size": 32,
             "exploration_final_eps": 0.0,
             "num_workers": 0,
