@@ -387,7 +387,7 @@ class CityFlowEnvRay(MultiAgentEnv):
         info of intersection 'id_'
         '''
         state = {}
-        print("engine:", self.eng)
+        
         get_lane_vehicle_count = self.eng.get_lane_vehicle_count()
         get_lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()
         get_lane_vehicles = self.eng.get_lane_vehicles()
@@ -395,11 +395,12 @@ class CityFlowEnvRay(MultiAgentEnv):
 
         print(self.intersection_id)
         print(id_)
-        print("start lane", self.start_lane)
+        # print("start lane", self.start_lane)
         # print("get_lane_vehicle_count key length:", get_lane_vehicle_count)
+        print("engine:", self.eng)
         print("get_lane_waiting_vehicle_count:", get_lane_waiting_vehicle_count)
-        print("get_lane_vehicles:", get_lane_vehicles)
-        print("vehicle_speed:", vehicle_speed)
+        # print("get_lane_vehicles:", get_lane_vehicles)
+        # print("vehicle_speed:", vehicle_speed)
 
         state['start_lane_vehicle_count'] = {lane: get_lane_vehicle_count[lane] for lane in self.start_lane[id_]}
         state['end_lane_vehicle_count'] = {lane: get_lane_vehicle_count[lane] for lane in self.end_lane[id_]}
