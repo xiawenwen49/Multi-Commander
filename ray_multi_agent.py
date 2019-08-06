@@ -7,7 +7,7 @@ from ray.tune import register_env, grid_search
 import ray.rllib.agents.dqn as dqn
 from ray.rllib.agents.dqn import DQNTrainer
 import ray.rllib.env.group_agents_wrapper
-
+import os
 
 from ray.tune.logger import pretty_print
 from gym.spaces import Tuple
@@ -35,6 +35,7 @@ parser.add_argument('--batch_size', type=int, default=128, help='model saving fr
 parser.add_argument('--state_time_span', type=int, default=5, help='state interval to receive long term state')
 parser.add_argument('--time_span', type=int, default=30, help='time interval to collect data')
 
+os.environ["CUDA_VISIBLE_DEVICES"]="0, 1" # use GPU
 
 def generate_config(args):
     with open(args.config) as f:
