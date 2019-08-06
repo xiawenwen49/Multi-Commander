@@ -30,7 +30,7 @@ parser.add_argument('--ckpt', type=str, help='inference or training')
 parser.add_argument('--epoch', type=int, default=100, help='number of training epochs')
 parser.add_argument('--num_step', type=int, default=10 ** 3,
                     help='number of timesteps for one episode, and for inference')
-parser.add_argument('--save_freq', type=int, default=100, help='model saving frequency')
+parser.add_argument('--save_freq', type=int, default=50, help='model saving frequency')
 parser.add_argument('--batch_size', type=int, default=128, help='model saving frequency')
 parser.add_argument('--state_time_span', type=int, default=5, help='state interval to receive long term state')
 parser.add_argument('--time_span', type=int, default=30, help='time interval to collect data')

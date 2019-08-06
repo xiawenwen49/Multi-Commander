@@ -455,7 +455,7 @@ class CityFlowEnvRay(MultiAgentEnv):
         '''
         state = self.intersection_info(id_)
         temp = state['start_lane_waiting_vehicle_count']
-        reward = -1*np.max(list(temp.values())) 
+        reward = 1*np.max(list(temp.values())) 
         return reward
 
     def get_score(self):
