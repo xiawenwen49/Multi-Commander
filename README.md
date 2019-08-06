@@ -45,15 +45,16 @@ open firefox with the url: http://localhost:8080/?roadnetFile=roadnet.json&logFi
 
 **Training**
 
-*DQN*
+*MDQN*
 ```
 python run_rl_multi_control.py --algo MDQN --epoch 1000 --num_step 500 --phase_step 8
 ```
 
 **Inference**
 
-*DQN*
+*MDQN*
 ```
+python run_rl_multi_control.py --algo MDQN --inference --num_step 1500 --phase_step 15 --ckpt model/XXXXXXX/MDQN-1.h5
 ```
 
 
