@@ -61,7 +61,7 @@ def main():
     args = parser.parse_args()
     config = generate_config(args)
 
-    env = CityFlowEnvRay(config)
+    # env = CityFlowEnvRay(config)
     # eng = cityflow.Engine(config["cityflow_config_file"], thread_num = config["thread_num"])
     # config["eng"] = [eng,]
     # print(config["eng"])
