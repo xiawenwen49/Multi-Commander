@@ -348,6 +348,7 @@ class CityFlowEnvRay(MultiAgentEnv):
     def reset(self):
         self.eng.reset()
         self.done = False
+        self.count = 0
         return {id_:np.zeros((self.state_size,)) for id_ in self.intersection_id}
 
     def step(self, action):
