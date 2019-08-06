@@ -81,4 +81,4 @@ open firefox with the url: http://localhost:8080/?roadnetFile=roadnet.json&logFi
 
 ---
 
-<iframe src="demos/1_6_700/demo_1_6.gif">
+<img src=demos/1_6_700/demo_1_6.gif />
