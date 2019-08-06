@@ -23,12 +23,12 @@ import cityflow
 parser = argparse.ArgumentParser()
 # parser.add_argument('--scenario', type=str, default='PongNoFrameskip-v4')
 parser.add_argument('--config', type=str, default='config/global_config_multi.json', help='config file')
-parser.add_argument('--algo', type=str, default='APEX_QMIX', choices=['QMIX', 'APEX_QMIX'],
+parser.add_argument('--algo', type=str, default='QMIX', choices=['QMIX', 'APEX_QMIX'],
                     help='choose an algorithm')
 parser.add_argument('--inference', action="store_true", help='inference or training')
 parser.add_argument('--ckpt', type=str, help='inference or training')
 parser.add_argument('--epoch', type=int, default=100, help='number of training epochs')
-parser.add_argument('--num_step', type=int, default=10 ** 3,
+parser.add_argument('--num_step', type=int, default=500,
                     help='number of timesteps for one episode, and for inference')
 parser.add_argument('--save_freq', type=int, default=50, help='model saving frequency')
 parser.add_argument('--batch_size', type=int, default=128, help='model saving frequency')
@@ -83,9 +83,9 @@ def main():
     if args.algo == "QMIX":
         config_ = {
             # "num_workers": 2,
-            "num_gpus_per_worker":0,
+            "num_gpus_per_worker":1,
             "sample_batch_size": 4,
-            "num_cpus_per_worker": 4,
+            "num_cpus_per_worker": 8,
             "train_batch_size": 32,
             "exploration_final_eps": 0.0,
             "num_workers": 0,
