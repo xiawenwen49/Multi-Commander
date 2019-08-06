@@ -57,9 +57,8 @@ def main():
     config = generate_config(args)
 
     env = CityFlowEnvRay(config)
-    for i in range(10):
-        print(len((list(env.eng.get_lane_vehicle_count().keys()))))
-
+    # for i in range(10):
+    #     print(len((list(env.eng.get_lane_vehicle_count().keys()))))
 
     num_agents = len(config["intersection_id"])
     grouping = {

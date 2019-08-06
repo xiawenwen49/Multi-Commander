@@ -56,7 +56,24 @@ python run_rl_multi_control.py --algo MDQN --epoch 1000 --num_step 500 --phase_s
 
 *DQN*
 ```
-python run_rl_multi_control.py --algo MDQN --inference --num_step 1500 --ckpt model/MDQN_20190804_155422/MDQN-10.h5
+```
 
-python run_rl_multi_control.py --algo MDQN --inference --num_step 1500  --phase_step 2 --ckpt model/MDQN_20190805_120454/MDQN-1.h5
+
+### Rule based
+*1\*6 roadnet*
+Generate checkpoint
+```
+python run_rl_multi_control.py --algo MDQN --epoch 1 --num_step 1 --phase_step 15
+```
+
+Generate replay file
+```
+python run_rl_multi_control.py --algo MDQN --inference --num_step 1500 --phase_step 15 --ckpt model/XXXXXXX/MDQN-1.h5
+```
+
+Simulation
+```
+. simulation.sh
+
+open firefox with the url: http://localhost:8080/?roadnetFile=roadnet.json&logFile=replay.txt
 ```

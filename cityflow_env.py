@@ -312,6 +312,7 @@ class CityFlowEnvRay(MultiAgentEnv):
         print("init")
         print(list(config.keys()))
         self.eng = cityflow.Engine(config["cityflow_config_file"], thread_num=config["thread_num"])
+        # res  =self.eng.get_lane_vehicle_count()
         self.num_step = config["num_step"]
         self.intersection_id = config["intersection_id"] # list, [intersection_id, ...]
         self.num_agents = len(self.intersection_id)
@@ -386,13 +387,7 @@ class CityFlowEnvRay(MultiAgentEnv):
         info of intersection 'id_'
         '''
         state = {}
-        # state['lane_vehicle_count'] = self.eng.get_lane_vehicle_count()  # {lane_id: lane_count, ...}
-        # state['start_lane_vehicle_count'] = {lane: self.eng.get_lane_vehicle_count()[lane] for lane in self.start_lane[id_]}
-        # state['lane_waiting_vehicle_count'] = self.eng.get_lane_waiting_vehicle_count()  # {lane_id: lane_waiting_count, ...}
-        # state['lane_vehicles'] = self.eng.get_lane_vehicles()  # {lane_id: [vehicle1_id, vehicle2_id, ...], ...}
-        # state['vehicle_speed'] = self.eng.get_vehicle_speed()  # {vehicle_id: vehicle_speed, ...}
-        # state['vehicle_distance'] = self.eng.get_vehicle_distance() # {vehicle_id: distance, ...}
-        # state['current_time'] = self.eng.get_current_time()
+        print("engine:", self.eng)
         get_lane_vehicle_count = self.eng.get_lane_vehicle_count()
         get_lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()
         get_lane_vehicles = self.eng.get_lane_vehicles()
@@ -400,16 +395,16 @@ class CityFlowEnvRay(MultiAgentEnv):
 
         print(self.intersection_id)
         print(id_)
-        # print(self.start_lane)
+        print("start lane", self.start_lane)
         # print("get_lane_vehicle_count key length:", get_lane_vehicle_count)
         print("get_lane_waiting_vehicle_count:", get_lane_waiting_vehicle_count)
         print("get_lane_vehicles:", get_lane_vehicles)
         print("vehicle_speed:", vehicle_speed)
 
-        # state['start_lane_vehicle_count'] = {lane: get_lane_vehicle_count[lane] for lane in self.start_lane[id_]}
-        # state['end_lane_vehicle_count'] = {lane: get_lane_vehicle_count[lane] for lane in self.end_lane[id_]}
-        state['start_lane_vehicle_count'] = {}
-        state['end_lane_vehicle_count'] = {}
+        state['start_lane_vehicle_count'] = {lane: get_lane_vehicle_count[lane] for lane in self.start_lane[id_]}
+        state['end_lane_vehicle_count'] = {lane: get_lane_vehicle_count[lane] for lane in self.end_lane[id_]}
+        # state['start_lane_vehicle_count'] = {}
+        # state['end_lane_vehicle_count'] = {}
 
         state['start_lane_waiting_vehicle_count'] = {lane: get_lane_waiting_vehicle_count[lane] for lane in self.start_lane[id_]}
         state['end_lane_waiting_vehicle_count'] = {lane: get_lane_waiting_vehicle_count[lane] for lane in self.end_lane[id_]}
@@ -437,7 +432,8 @@ class CityFlowEnvRay(MultiAgentEnv):
         reward = {id_: self.get_reward_(id_) for id_ in self.intersection_id}
         mean_global_sum = np.mean(list(reward.values()))
         # return reward
-        return mean_global_sum
+        reward = {id_:mean_global_sum for id_ in self.intersection_id}
+        return reward
 
     # def get_reward_(self, id_):
     #     '''
