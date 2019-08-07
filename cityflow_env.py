@@ -436,18 +436,9 @@ class CityFlowEnvRay(MultiAgentEnv):
     def get_reward(self):
         reward = {id_: self.get_reward_(id_) for id_ in self.intersection_id}
         mean_global_sum = np.mean(list(reward.values()))
-        # return reward
-        reward = {id_:mean_global_sum for id_ in self.intersection_id}
         return reward
-
-    # def get_reward_(self, id_):
-    #     '''
-    #     every agent/intersection's reward
-    #     '''
-    #     state = self.intersection_info(id_)
-    #     start_lane_waiting_vehicle_count = state['start_lane_waiting_vehicle_count']
-    #     reward = -1 * np.sum(list(start_lane_waiting_vehicle_count.values()))
-    #     return reward
+        # reward = {id_:mean_global_sum for id_ in self.intersection_id}
+        # return reward
 
     def get_reward_(self, id_):
         '''
