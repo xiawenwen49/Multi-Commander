@@ -89,7 +89,6 @@ def main():
             "exploration_final_eps": 0.0,
             "num_workers": 1,
             "mixer": grid_search(["qmix"]),
-            "checkpoint_freq":args.save_freq,
             "env_config":config
         }
         group = True
@@ -107,7 +106,6 @@ def main():
             "sample_batch_size": 32,
             "target_network_update_freq": 100,
             "timesteps_per_iteration": 1000,
-            "checkpoint_freq":args.save_freq,
             "env_config":config
         }
         group = True
@@ -121,6 +119,7 @@ def main():
         stop={
             "timesteps_total":args.epoch*args.num_step
         },
+        checkpoint_freq=args.save_freq,
         config=dict(config_,
         **{"env":"cityflow_multi"}),
     )
