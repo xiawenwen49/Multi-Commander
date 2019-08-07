@@ -443,8 +443,8 @@ class CityFlowEnvRay(MultiAgentEnv):
         state['start_lane_vehicles'] = {lane: get_lane_vehicles[lane] for lane in self.start_lane[id_]}
         state['end_lane_vehicles'] = {lane: get_lane_vehicles[lane] for lane in self.end_lane[id_]}
         
-        state['start_lane_speed'] = {lane: np.sum(list(map(lambda vehicle:get_vehicle_speed[vehicle], get_lane_vehicles[lane]))) / (get_lane_vehicle_count[lane]+1e-5) for lane in self.start_lane[id_]} # compute start lane mean speed
-        state['end_lane_speed'] = {lane: np.sum(list(map(lambda vehicle:get_vehicle_speed[vehicle], get_lane_vehicles[lane]))) / (get_lane_vehicle_count[lane]+1e-5) for lane in self.end_lane[id_]} # compute end lane mean speed
+        state['start_lane_speed'] = {lane: np.mean(list(map(lambda v:get_vehicle_speed[v], get_lane_vehicles[lane]))) for lane in self.start_lane[id_]} # compute start lane mean speed
+        state['end_lane_speed'] = {lane: np.mean(list(map(lambda v:get_vehicle_speed[v], get_lane_vehicles[lane]))) for lane in self.end_lane[id_]} # compute end lane mean speed
         
         state['current_phase'] = self.current_phase[id_]
         state['current_phase_time'] = self.current_phase_time[id_]
