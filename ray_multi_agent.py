@@ -87,7 +87,7 @@ def main():
             "num_cpus_per_worker": 32,
             "train_batch_size": 32,
             "exploration_final_eps": 0.0,
-            "num_workers": 0,
+            "num_workers": 1,
             "mixer": grid_search(["qmix"]),
             "env_config":config
         }
