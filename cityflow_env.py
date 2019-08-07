@@ -384,7 +384,7 @@ class CityFlowEnvRay(MultiAgentEnv):
             for id_ in self.intersection_id:
                 if self.congestion[id_]:
                     self.done[id_] = True
-            if any(list(self.congestion.values())) is False:
+            if all(list(self.congestion.values())) is True:
                 self.done['__all__'] = True
             else:
                 self.done['__all__'] = False
