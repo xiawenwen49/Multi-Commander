@@ -367,7 +367,7 @@ class CityFlowEnvRay(MultiAgentEnv):
         self.eng.next_step()
 
         self.count += 1
-        if self.count > self.num_step:
+        if self.count >= self.num_step:
             self.done = True
         state = self.get_state()
         reward = self.get_reward()
