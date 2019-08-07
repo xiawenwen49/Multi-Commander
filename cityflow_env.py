@@ -317,6 +317,7 @@ class CityFlowEnvRay(MultiAgentEnv):
         self.num_agents = len(self.intersection_id)
         self.state_size = None
         self.lane_phase_info = config["lane_phase_info"] # "intersection_1_1"
+        self.congestion_thres = 20
 
         self.current_phase = {}
         self.current_phase_time = {}
@@ -384,7 +385,7 @@ class CityFlowEnvRay(MultiAgentEnv):
             for id_ in self.intersection_id:
                 if self.congestion[id_]:
                     self.done[id_] = True
-                    reward[id_] = -200 # if congestion, return a large penaty
+                    reward[id_] = -1000 # if congestion, return a large penaty
             if all(list(self.congestion.values())) is True:
                 self.done['__all__'] = True
             else:
@@ -398,7 +399,7 @@ class CityFlowEnvRay(MultiAgentEnv):
             intersection_info[id_] = self.intersection_info(id_)
         congestion = {id_:False for id_ in self.intersection_id}
         for id_ in self.intersection_id:
-            if np.max(list(intersection_info[id_]["start_lane_waiting_vehicle_count"].values())) > 20:
+            if np.max(list(intersection_info[id_]["start_lane_waiting_vehicle_count"].values())) > self.congestion_thres:
                 congestion[id_] = True
         return congestion
 
