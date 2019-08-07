@@ -394,7 +394,7 @@ class CityFlowEnvRay(MultiAgentEnv):
     def compute_congestion(self):
         intersection_info = {}
         for id_ in self.intersection_id:
-            intersection_info[id_] = self.intersection_id(id_)
+            intersection_info[id_] = self.intersection_info(id_)
         congestion = {id_:False for id_ in self.intersection_id}
         for id_ in self.intersection_id:
             if np.max(list(intersection_info[id_]["start_lane_waiting_vehicle_count"].values())) > 20:
