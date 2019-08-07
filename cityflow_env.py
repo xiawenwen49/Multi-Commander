@@ -343,11 +343,13 @@ class CityFlowEnvRay(MultiAgentEnv):
         
         self.count = 0
         self.done = False
+        self.congestion = False
         self.reset()
         
     def reset(self):
         self.eng.reset()
         self.done = False
+        self.congestion = False
         self.count = 0
         return {id_:np.zeros((self.state_size,)) for id_ in self.intersection_id}
 
@@ -365,15 +367,39 @@ class CityFlowEnvRay(MultiAgentEnv):
             self.eng.set_tl_phase(id_, self.current_phase[id_]) # set phase of traffic light
         # print("after action:", action)
         self.eng.next_step()
-
         self.count += 1
-        if self.count >= self.num_step:
+
+        if self.count >= self.num_step or self.congestion:
             self.done = True
         state = self.get_state()
         reward = self.get_reward()
-        done = {id_: self.done for id_ in self.intersection_id} # !
-        done['__all__'] = self.done # !
-        return state, reward, done, {} 
+
+        self.congestion = self.compute_congestion()
+        self.done = {id_:False for id_ in self.intersection_id}
+        self.done['__all__'] = False
+        if self.count >= self.num_step:
+            self.done = {id_:True for id_ in self.intersection_id}
+            self.done['__all__'] = True
+        else:
+            for id_ in self.intersection_id:
+                if self.congestion[id_]:
+                    self.done[id_] = True
+            if any(list(self.congestion.values())) is False:
+                self.done['__all__'] = True
+            else:
+                self.done['__all__'] = False
+        
+        return state, reward, self.done, {} 
+
+    def compute_congestion(self):
+        intersection_info = {}
+        for id_ in self.intersection_id:
+            intersection_info[id_] = self.intersection_id(id_)
+        congestion = {id_:False for id_ in self.intersection_id}
+        for id_ in self.intersection_id:
+            if np.max(list(intersection_info[id_]["start_lane_waiting_vehicle_count"].values())) > 20:
+                congestion[id_] = True
+        return congestion
 
     def get_state(self):
         state =  {id_: self.get_state_(id_) for id_ in self.intersection_id}
