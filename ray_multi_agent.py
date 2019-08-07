@@ -28,7 +28,7 @@ parser.add_argument('--algo', type=str, default='QMIX', choices=['QMIX', 'APEX_Q
 parser.add_argument('--inference', action="store_true", help='inference or training')
 parser.add_argument('--ckpt', type=str, help='inference or training')
 parser.add_argument('--epoch', type=int, default=100, help='number of training epochs')
-parser.add_argument('--num_step', type=int, default=500,help='number of timesteps for one episode, and for inference')
+parser.add_argument('--num_step', type=int, default=1000,help='number of timesteps for one episode, and for inference')
 parser.add_argument('--save_freq', type=int, default=50, help='model saving frequency')
 parser.add_argument('--batch_size', type=int, default=128, help='model saving frequency')
 parser.add_argument('--state_time_span', type=int, default=5, help='state interval to receive long term state')
@@ -89,6 +89,7 @@ def main():
             "exploration_final_eps": 0.0,
             "num_workers": 1,
             "mixer": grid_search(["qmix"]),
+            "checkpoint_freq":100,
             "env_config":config
         }
         group = True
