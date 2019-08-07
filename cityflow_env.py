@@ -317,7 +317,7 @@ class CityFlowEnvRay(MultiAgentEnv):
         self.num_agents = len(self.intersection_id)
         self.state_size = None
         self.lane_phase_info = config["lane_phase_info"] # "intersection_1_1"
-        self.congestion_thres = 20
+        self.congestion_thres = 30
 
         self.current_phase = {}
         self.current_phase_time = {}
