@@ -381,7 +381,7 @@ class CityFlowEnvRay(MultiAgentEnv):
 
     def get_state_(self, id_):
         state = self.intersection_info(id_)
-        state_dict = state['start_lane_vehicle_count']
+        state_dict = state['start_lane_waiting_vehicle_count']
         sorted_keys = sorted(state_dict.keys())
         return_state = [state_dict[key] for key in sorted_keys] + [state['current_phase']]
         return self.preprocess_state(return_state)
@@ -445,8 +445,8 @@ class CityFlowEnvRay(MultiAgentEnv):
         every agent/intersection's reward
         '''
         state = self.intersection_info(id_)
-        temp = state['start_lane_waiting_vehicle_count']
-        reward = -1*np.mean(list(temp.values())) 
+        temp = state['start_lane_speed']
+        reward = np.mean(list(temp.values())) 
         return reward
 
     def get_score(self):

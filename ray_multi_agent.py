@@ -60,7 +60,7 @@ def main():
     args = parser.parse_args()
     config = generate_config(args)
 
-    env = CityFlowEnvRay(config)
+    # env = CityFlowEnvRay(config)
     # eng = cityflow.Engine(config["cityflow_config_file"], thread_num = config["thread_num"])
     # config["eng"] = [eng,]
     # print(config["eng"])
@@ -84,7 +84,7 @@ def main():
             # "num_workers": 2,
             "num_gpus_per_worker":1,
             "sample_batch_size": 4,
-            "num_cpus_per_worker": 4,
+            "num_cpus_per_worker": 32,
             "train_batch_size": 32,
             "exploration_final_eps": 0.0,
             "num_workers": 0,
