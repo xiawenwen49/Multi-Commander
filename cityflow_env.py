@@ -379,11 +379,13 @@ class CityFlowEnvRay(MultiAgentEnv):
         if self.count >= self.num_step:
             self.done = {id_:True for id_ in self.intersection_id}
             self.done['__all__'] = True
+            # for id_ in self.intersection_id:
+            #     reward[id_] = 0
         else:
             for id_ in self.intersection_id:
                 if self.congestion[id_]:
                     self.done[id_] = True
-                    reward[id_] = -50*(self.num_step-self.count) # if congestion, return a large penaty
+                    reward[id_] = -1*50*(self.num_step-self.count) # if congestion, return a large penaty
             if all(list(self.congestion.values())) is True:
                 self.done['__all__'] = True
             else:
@@ -473,6 +475,9 @@ class CityFlowEnvRay(MultiAgentEnv):
         state = self.intersection_info(id_)
         temp = state['start_lane_waiting_vehicle_count']
         reward = -1 * np.mean(list(temp.values())) 
+        print("##########################################")
+        print(id_, reward)
+        print("##########################################")
         return reward
 
     def get_score(self):

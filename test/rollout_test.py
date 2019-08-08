@@ -15,7 +15,7 @@ from ray.rllib.env.base_env import _DUMMY_AGENT_ID
 from ray.rllib.policy.sample_batch import DEFAULT_POLICY_ID
 from ray.tune.util import merge_dicts
 from ray.tune.registry import register_env
-from cityflow_env import CityflowGymEnv
+from cityflow_env import CityFlowEnvRay
 import logging
 from utility import parse_roadnet
 
