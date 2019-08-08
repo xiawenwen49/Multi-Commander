@@ -28,13 +28,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--config', type=str, default='/home/{}/workspace/Multi-Commander/config/global_config_multi.json'.format(USERNAME), help='config file')
 parser.add_argument('--algo', type=str, default='QMIX', choices=['QMIX', 'APEX_QMIX'],
                     help='choose an algorithm')
-<<<<<<< HEAD
-parser.add_argument('--inference', action="store_true", help='inference or training')
-parser.add_argument('--ckpt', type=str, help='inference or training')
-=======
 parser.add_argument('--rollout', type=bool, default=False, help='rollout a policy')
 parser.add_argument('--ckpt', type=str, default=r'/home/{}/ray_results/QMIX/QMIX_cityflow_multi_0_mixer=qmix_2019-08-09_02-06-289p2gzf2s/checkpoint_1/checkpoint-1'.format(USERNAME), help='checkpoint')
->>>>>>> 70120cb2171e2c4c86af90101b47d25b2025f9c9
 parser.add_argument('--epoch', type=int, default=1000, help='number of training epochs')
 parser.add_argument('--num_step', type=int, default=1500,help='number of timesteps for one episode, and for inference')
 parser.add_argument('--save_freq', type=int, default=50, help='model saving frequency')
