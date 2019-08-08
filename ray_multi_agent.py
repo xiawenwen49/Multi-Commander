@@ -27,7 +27,7 @@ parser.add_argument('--algo', type=str, default='QMIX', choices=['QMIX', 'APEX_Q
                     help='choose an algorithm')
 parser.add_argument('--inference', action="store_true", help='inference or training')
 parser.add_argument('--ckpt', type=str, help='inference or training')
-parser.add_argument('--epoch', type=int, default=500, help='number of training epochs')
+parser.add_argument('--epoch', type=int, default=1000, help='number of training epochs')
 parser.add_argument('--num_step', type=int, default=1500,help='number of timesteps for one episode, and for inference')
 parser.add_argument('--save_freq', type=int, default=50, help='model saving frequency')
 parser.add_argument('--batch_size', type=int, default=128, help='model saving frequency')
