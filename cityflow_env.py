@@ -364,7 +364,9 @@ class CityFlowEnvRay(MultiAgentEnv):
         '''
         action: {intersection_id: phase, ...}
         '''
-        print("action:", action)
+        if self.count % 400 == 0:
+            print("action:", action)
+
         for id_, a in action.items():
             if self.current_phase[id_] == self.phase_list[id_][a]:
                 self.current_phase_time[id_] += 1
