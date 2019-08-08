@@ -301,21 +301,25 @@ class CityFlowEnvM(object):
 import ray
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
 from gym.spaces import Discrete, Box
+from collections import deque
 class CityFlowEnvRay(MultiAgentEnv):
     '''
     multi inersection cityflow environment, for the Ray framework
     '''
-    observation_space = Box(0.0*np.ones((13,)), 100*np.ones((13,)))
-    action_space = Discrete(8) # num of agents
+    observation_space = Box(0*np.ones((9,)), 100*np.ones((9,)))
+    action_space = Discrete(8) # num of phases
 
     def __init__(self, config):
         print("init")
+        print("config:", list(config.keys()))
+        self.config = config
         self.eng = cityflow.Engine(config["cityflow_config_file"], thread_num=config["thread_num"])
         # self.eng = config["eng"][0]
         self.num_step = config["num_step"]
         self.intersection_id = config["intersection_id"] # list, [intersection_id, ...]
         self.num_agents = len(self.intersection_id)
         self.state_size = None
+        
         self.lane_phase_info = config["lane_phase_info"] # "intersection_1_1"
         self.congestion_thres = 30
 
@@ -326,6 +330,7 @@ class CityFlowEnvRay(MultiAgentEnv):
         self.phase_list = {}
         self.phase_startLane_mapping = {}
         self.intersection_lane_mapping = {} #{id_:[lanes]}
+        self.action_log = deque(maxlen=100)
 
         for id_ in self.intersection_id:
             self.start_lane[id_] = self.lane_phase_info[id_]['start_lane']
@@ -333,10 +338,11 @@ class CityFlowEnvRay(MultiAgentEnv):
             self.phase_startLane_mapping[id_] = self.lane_phase_info[id_]["phase_startLane_mapping"]
 
             self.phase_list[id_] = self.lane_phase_info[id_]["phase"]
-            self.current_phase[id_] = self.phase_list[id_][0]
+            self.num_actions = len(self.phase_list[self.intersection_id[0]])
+            self.current_phase[id_] = self.phase_list[id_][np.random.randint(self.num_actions)]
             self.current_phase_time[id_] = 0
         self.get_state() # set self.state_size
-        self.num_actions = len(self.phase_list[self.intersection_id[0]])
+        
 
         # self.observation_space = Box(np.ones(0.0*(self.state_size,)), 20.0*np.ones((self.state_size)))
         # self.action_space = Discrete(self.num_actions) # num of agents
@@ -358,7 +364,9 @@ class CityFlowEnvRay(MultiAgentEnv):
         '''
         action: {intersection_id: phase, ...}
         '''
-        # print("action:", action)
+        if self.count % 400 == 0:
+            print("action:", action)
+
         for id_, a in action.items():
             if self.current_phase[id_] == self.phase_list[id_][a]:
                 self.current_phase_time[id_] += 1
@@ -385,12 +393,24 @@ class CityFlowEnvRay(MultiAgentEnv):
             for id_ in self.intersection_id:
                 if self.congestion[id_]:
                     self.done[id_] = True
-                    reward[id_] = -1*50*(self.num_step-self.count) # if congestion, return a large penaty
+                    # reward[id_] = -1*50*(self.num_step-self.count) # if congestion, return a large penaty
+                    reward[id_] = -50
             if all(list(self.congestion.values())) is True:
                 self.done['__all__'] = True
             else:
                 self.done['__all__'] = False
-        
+
+        # for rollout ######
+        if self.config["rollout"]:
+            reward = self.get_reward()
+            if self.count >= self.num_step:
+                self.done = {id_:True for id_ in self.intersection_id}
+                self.done['__all__'] = True
+            else:
+                self.done = {id_:False for id_ in self.intersection_id}
+                self.done['__all__'] = False
+            
+        # for rollout ######
         return state, reward, self.done, {} 
 
     def compute_congestion(self):
@@ -408,10 +428,21 @@ class CityFlowEnvRay(MultiAgentEnv):
         return state
 
     def get_state_(self, id_):
+        # state = self.intersection_info(id_)
+        # state_dict = state['start_lane_vehicle_count']
+        # sorted_keys = sorted(state_dict.keys())
+        # return_state = [state_dict[key] for key in sorted_keys] + [state['current_phase']]
+        # return self.preprocess_state(return_state)
+
         state = self.intersection_info(id_)
-        state_dict = state['start_lane_waiting_vehicle_count']
-        sorted_keys = sorted(state_dict.keys())
-        return_state = [state_dict[key] for key in sorted_keys] + [state['current_phase']]
+        state_dict = state['start_lane_vehicle_count']
+        return_state = []
+        phase_startLane_mapping = self.phase_startLane_mapping[id_]
+        for i in range(self.num_actions): # each phase's startLane vehicle count
+            phase = self.phase_list[id_][i]
+            startLane_mapping = phase_startLane_mapping[phase] # ['road_0_1_0_1', 'road_0_1_0_2', ...]
+            return_state.append( np.sum([state_dict[startLane] for startLane in startLane_mapping]) )
+        return_state = return_state + [state['current_phase']]
         return self.preprocess_state(return_state)
 
     def intersection_info(self, id_):
@@ -464,9 +495,9 @@ class CityFlowEnvRay(MultiAgentEnv):
     def get_reward(self):
         reward = {id_: self.get_reward_(id_) for id_ in self.intersection_id}
         mean_global_sum = np.mean(list(reward.values()))
-        return reward
-        # reward = {id_:mean_global_sum for id_ in self.intersection_id}
         # return reward
+        reward = {id_:mean_global_sum for id_ in self.intersection_id}
+        return reward
 
     def get_reward_(self, id_):
         '''
@@ -474,10 +505,10 @@ class CityFlowEnvRay(MultiAgentEnv):
         '''
         state = self.intersection_info(id_)
         temp = state['start_lane_waiting_vehicle_count']
-        reward = -1 * np.mean(list(temp.values())) 
-        print("##########################################")
-        print(id_, reward)
-        print("##########################################")
+        reward = -1 * np.max(list(temp.values())) 
+        # print("##########################################")
+        # print(id_, reward)
+        # print("##########################################")
         return reward
 
     def get_score(self):

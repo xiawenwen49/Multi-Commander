@@ -9,6 +9,7 @@ import os
 import pickle
 import gym
 from gym.envs.registration import register
+from gym.spaces import Tuple
 import ray
 from ray.rllib.agents.registry import get_agent_class
 from ray.rllib.env import MultiAgentEnv
@@ -17,7 +18,7 @@ from ray.rllib.policy.sample_batch import DEFAULT_POLICY_ID
 from ray.tune.util import merge_dicts
 from ray.tune.registry import register_env
 import sys
-sys.path.append('../')
+sys.path.append(r'../')
 from cityflow_env import CityFlowEnvRay
 import logging
 from utility import parse_roadnet
@@ -32,10 +33,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--global_config', type=str, default='/home/leaves/workspace/Multi-Commander/config/global_config_multi.json', help='config file')
 parser.add_argument('--run', type=str, default='QMIX', choices=['QMIX', 'APEX_QMIX'],
                     help='choose an algorithm')
-parser.add_argument('--checkpoint', type=str, default=r'~/ray_results/QMIX/QMIX_cityflow_multi_0_mixer\=qmix_2019-08-07_18-25-5716112rhk/checkpoint_200/', help='checkpoint dir')
-parser.add_argument('--ckpt_config', type=str, default='~/ray_results/QMIX/experiment_state-2019-08-07_18-25-57.json', help='checkpoint config')
+parser.add_argument('--checkpoint', type=str, default=r'/home/leaves/ray_results/QMIX/QMIX_cityflow_multi_0_mixer=qmix_2019-08-07_18-25-5716112rhk/checkpoint_200/checkpoint-200', help='checkpoint dir')
+parser.add_argument('--ckpt_config', type=str, default='/home/leaves/ray_results/QMIX/experiment_state-2019-08-07_18-25-57.json', help='checkpoint config')
 parser.add_argument('--env', type=str, default='Cityflow-v0', help='environment')
 parser.add_argument('--epoch', type=int, default=500, help='number of training epochs')
+parser.add_argument('--out', type=bool, default=True, help='rollout out')
 parser.add_argument('--num_step', type=int, default=1500,help='number of timesteps for one episode, and for inference')
 parser.add_argument('--save_freq', type=int, default=50, help='model saving frequency')
 parser.add_argument('--batch_size', type=int, default=128, help='model saving frequency')
@@ -67,30 +69,54 @@ def generate_config(args):
 
 
 def run(args, config_env):
-    config = {}
-    # Load configuration from file
-    config_dir = os.path.dirname(args.checkpoint)
-    config_path = os.path.join(config_dir, "params.pkl")
-    if not os.path.exists(config_path):
-        config_path = os.path.join(config_dir, "../params.pkl")
-    if not os.path.exists(config_path):
-        if not args.ckpt_config:
-            raise ValueError(
-                "Could not find params.pkl in either the checkpoint dir or "
-                "its parent directory.")
-    else:
-        with open(config_path, "rb") as f:
-            config = pickle.load(f)
-    if "num_workers" in config:
-        config["num_workers"] = min(2, config["num_workers"])
-#    config = merge_dicts(config, config_env)
+    # config = {}
+    # # Load configuration from file
+    # config_dir = os.path.dirname(args.checkpoint)
+    # config_path = os.path.join(config_dir, "params.pkl")
 
+    # print("config_path:", config_path)
+
+    # if not os.path.exists(config_path):
+    #     config_path = os.path.join(config_dir, "../params.pkl")
+    # if not os.path.exists(config_path):
+    #     if not args.ckpt_config:
+    #         raise ValueError(
+    #             "Could not find params.pkl in either the checkpoint dir or "
+    #             "its parent directory.")
+    # else:
+    #     with open(config_path, "rb") as f:
+    #         config = pickle.load(f)
+    # if "num_workers" in config:
+    #     config["num_workers"] = min(2, config["num_workers"])
+    config_agent = {
+            # "num_workers": 2,
+            "num_gpus_per_worker":0,
+            "sample_batch_size": 4,
+            "num_cpus_per_worker": 1,
+            "train_batch_size": 32,
+            "exploration_final_eps": 0.0,
+            "num_workers": 0,
+            "env_config":config_env
+        }
+    
     ray.init()
     cls = get_agent_class(args.run)
-    register_env("Cityflow-v0", lambda config: CityFlowEnvRay(config))
-    agent = cls(env=args.env, config=config)
+    print("Register")
+    num_agents = len(config_env["intersection_id"])
+    grouping = {
+        "group_1":[id_ for id_ in config_env["intersection_id"]]
+    }
+    obs_space = Tuple([
+        CityFlowEnvRay.observation_space for _ in range(num_agents)
+    ])
+    act_space = Tuple([
+        CityFlowEnvRay.action_space for _ in range(num_agents)
+    ])
+    register_env("Cityflow-v0", lambda config: CityFlowEnvRay(config).with_agent_groups(grouping, obs_space=obs_space, act_space=act_space))
+    agent = cls(env=args.env, config=config_agent) # !!
     agent.restore(args.checkpoint)
     # env = CityflowGymEnv(config_env)
+    print("Create env!", list(config_env.keys()))
     env = CityFlowEnvRay(config_env)
 
     num_step = int(args.num_step)
@@ -105,6 +131,8 @@ def run(args, config_env):
         done = False
         reward_total = 0.0
         while not done and steps < (num_step or steps + 1):
+            state_ = list(state[key] for key in sorted(state.keys()))
+            state = state_
             action = agent.compute_action(state)
             next_state, reward, done, _ = env.step(action)
             reward_total += reward

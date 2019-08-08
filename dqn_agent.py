@@ -10,6 +10,7 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 import keras.backend.tensorflow_backend as KTF
 import tensorflow as tf
+from keras import initializer
 import os
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
@@ -44,9 +45,9 @@ class DQNAgent(object):
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(Dense(40, input_dim=self.state_size, activation='relu'))
-        model.add(Dense(40, activation='relu'))
-        model.add(Dense(self.action_size, activation='linear'))
+        model.add(Dense(40, input_dim=self.state_size, activation='relu', kernel_initializer=initializer.glorot_uniform(seed=0)))
+        model.add(Dense(40, activation='relu', kernel_initializer=initializer.glorot_uniform(seed=0)))
+        model.add(Dense(self.action_size, activation='linear', kernel_initializer=initializer.glorot(seed=0)))
         model.compile(loss='mse',
                       optimizer=Adam(lr=self.learning_rate))
         return model
