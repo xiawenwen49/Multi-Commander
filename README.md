@@ -50,6 +50,8 @@ open firefox with the url: http://localhost:8080/?roadnetFile=roadnet.json&logFi
 python ray_multi_agent.py
 ```
 
+<img src=demos/QMIX_tensorboard.png />
+
 *MDQN*
 ```
 python run_rl_multi_control.py --algo MDQN --epoch 1000 --num_step 500 --phase_step 10
@@ -63,7 +65,7 @@ python run_rl_multi_control.py --algo MDQN --inference --num_step 1500 --phase_s
 ```
 
 
-### Rule based
+#### Rule based
 *1\*6 roadnet*
 
 Generate checkpoint
@@ -76,12 +78,16 @@ Generate replay file
 python run_rl_multi_control.py --algo MDQN --inference --num_step 1500 --phase_step 15 --ckpt model/XXXXXXX/MDQN-1.h5
 ```
 
+
 Simulation
 ```
 . simulation.sh
 
 open firefox with the url: http://localhost:8080/?roadnetFile=roadnet.json&logFile=replay.txt
 ```
+
+
+
 
 
 ---
