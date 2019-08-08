@@ -19,18 +19,21 @@ import argparse
 import json
 from cityflow_env import CityFlowEnvRay
 import cityflow
+import getpass
+
+USERNAME = getpass.getuser()
 
 parser = argparse.ArgumentParser()
 # parser.add_argument('--scenario', type=str, default='PongNoFrameskip-v4')
-parser.add_argument('--config', type=str, default='config/global_config_multi.json', help='config file')
+parser.add_argument('--config', type=str, default='/home/{}/workspace/Multi-Commander/config/global_config_multi.json'.format(USERNAME), help='config file')
 parser.add_argument('--algo', type=str, default='QMIX', choices=['QMIX', 'APEX_QMIX'],
                     help='choose an algorithm')
-parser.add_argument('--inference', action="store_true", help='inference or training')
-parser.add_argument('--ckpt', type=str, help='inference or training')
-parser.add_argument('--epoch', type=int, default=500, help='number of training epochs')
+parser.add_argument('--rollout', type=bool, default=False, help='rollout a policy')
+parser.add_argument('--ckpt', type=str, default=r'/home/{}/ray_results/QMIX/QMIX_cityflow_multi_0_mixer=qmix_2019-08-09_02-06-289p2gzf2s/checkpoint_1/checkpoint-1'.format(USERNAME), help='checkpoint')
+parser.add_argument('--epoch', type=int, default=1000, help='number of training epochs')
 parser.add_argument('--num_step', type=int, default=1500,help='number of timesteps for one episode, and for inference')
 parser.add_argument('--save_freq', type=int, default=50, help='model saving frequency')
-parser.add_argument('--batch_size', type=int, default=128, help='model saving frequency')
+parser.add_argument('--batch_size', type=int, default=32, help='model saving frequency')
 parser.add_argument('--state_time_span', type=int, default=5, help='state interval to receive long term state')
 parser.add_argument('--time_span', type=int, default=30, help='time interval to collect data')
 
@@ -51,6 +54,7 @@ def generate_config(args):
     config["thread_num"] = 1
     config["state_time_span"] = args.state_time_span
     config["time_span"] = args.time_span
+    config["rollout"] = args.rollout
     # phase_list = config['lane_phase_info'][intersection_id]['phase']
     # logging.info(phase_list)
     # config["state_size"] = len(config['lane_phase_info'][intersection_id]['start_lane']) + 1 # 1 is for the current phase. [vehicle_count for each start lane] + [current_phase]
@@ -60,13 +64,13 @@ def main():
     args = parser.parse_args()
     config = generate_config(args)
 
-    # env = CityFlowEnvRay(config)
+    env = CityFlowEnvRay(config)
     # eng = cityflow.Engine(config["cityflow_config_file"], thread_num = config["thread_num"])
     # config["eng"] = [eng,]
     # print(config["eng"])
     num_agents = len(config["intersection_id"])
     grouping = {
-        "group_1":[id_ for id_ in config["intersection_id"]]
+        "group_1":[id_ for id_ in sorted(config["intersection_id"])]
     }
     obs_space = Tuple([
         CityFlowEnvRay.observation_space for _ in range(num_agents)
@@ -84,10 +88,10 @@ def main():
             # "num_workers": 2,
             "num_gpus_per_worker":0,
             "sample_batch_size": 4,
-            "num_cpus_per_worker": 3,
+            "num_cpus_per_worker": 2,
             "train_batch_size": 32,
             "exploration_final_eps": 0.0,
-            "num_workers": 8,
+            "num_workers": 1,
             "mixer": grid_search(["qmix"]),
             "env_config":config
         }
@@ -114,15 +118,30 @@ def main():
         group = False
     
     ray.init()
-    tune.run(
-        args.algo,
-        stop={
-            "timesteps_total":args.epoch*args.num_step
-        },
-        checkpoint_freq=args.save_freq,
-        config=dict(config_,
-        **{"env":"cityflow_multi"}),
-    )
+    if not args.rollout:
+        tune.run(
+            args.algo,
+            stop={
+                "timesteps_total":args.epoch*args.num_step
+            },
+            checkpoint_freq=args.save_freq,
+            config=dict(config_,
+            **{"env":"cityflow_multi"}),
+        )
+    else:
+        print("#####################")
+        print("rollout...")
+        print("#####################")
+        tune.run(
+            args.algo,
+            stop={
+                "timesteps_total":args.num_step,
+                "training_iteration": 1
+            },
+            restore=args.ckpt,
+            config=dict(config_,
+            **{"env":"cityflow_multi"}),
+        )
 
 
 if __name__ == '__main__':

@@ -1,0 +1,5 @@
+/home
+/leaves
+/ray_results
+/QMIX/QMIX_cityflow_multi_0_mixer-qmix_2019-08-07_18-25-5716112rhk
+/checkpint_200/
