@@ -24,12 +24,12 @@ def main():
     date = datetime.now().strftime('%Y%m%d_%H%M%S')
     parser = argparse.ArgumentParser()
     # parser.add_argument('--scenario', type=str, default='PongNoFrameskip-v4')
-    parser.add_argument('--config', type=str, default='config/global_config_multi.json', help='config file')
+    parser.add_argument('--config', type=str, default='/home/leaves/workspace/Multi-Commander/config/global_config_multi.json', help='config file')
     parser.add_argument('--algo', type=str, default='MDQN', choices=['MDQN',], help='choose an algorithm')
     parser.add_argument('--inference', action="store_true", help='inference or training')
     parser.add_argument('--ckpt', type=str, help='inference or training')
-    parser.add_argument('--epoch', type=int, default=10, help='number of training epochs')
-    parser.add_argument('--num_step', type=int, default=1500, help='number of timesteps for one episode, and for inference')
+    parser.add_argument('--epoch', type=int, default=1, help='number of training epochs')
+    parser.add_argument('--num_step', type=int, default=10, help='number of timesteps for one episode, and for inference')
     parser.add_argument('--save_freq', type=int, default=1, help='model saving frequency')
     parser.add_argument('--batch_size', type=int, default=32, help='batchsize for training')
     parser.add_argument('--phase_step', type=int, default=15, help='seconds of one phase')
@@ -222,7 +222,7 @@ def main():
             state = next_state
 
             print("step:{}/{}, action:{}, reward:{}, score:{}"
-                            .format(i+1, args.num_step, action, reward, score))
+                            .format(i+1, args.num_step, list(action.values()), list(reward.values()), list(score.values())) )
         
         mean_reward = {}
         mean_score = {}

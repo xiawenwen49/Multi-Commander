@@ -29,7 +29,7 @@ parser.add_argument('--config', type=str, default='/home/{}/workspace/Multi-Comm
 parser.add_argument('--algo', type=str, default='QMIX', choices=['QMIX', 'APEX_QMIX'],
                     help='choose an algorithm')
 parser.add_argument('--rollout', type=bool, default=False, help='rollout a policy')
-parser.add_argument('--ckpt', type=str, default=r'/home/{}/ray_results/QMIX/QMIX_cityflow_multi_0_mixer=qmix_2019-08-09_02-06-289p2gzf2s/checkpoint_1/checkpoint-1'.format(USERNAME), help='checkpoint')
+parser.add_argument('--ckpt', type=str, default=r'/home/{}/ray_results/QMIX/QMIX_cityflow_multi_0_mixer=qmix_2019-08-09_02-48-52wfilvlwu/checkpoint-300/checkpoint-300'.format(USERNAME), help='checkpoint')
 parser.add_argument('--epoch', type=int, default=1000, help='number of training epochs')
 parser.add_argument('--num_step', type=int, default=1000,help='number of timesteps for one episode, and for inference')
 parser.add_argument('--save_freq', type=int, default=50, help='model saving frequency')
@@ -64,7 +64,7 @@ def main():
     args = parser.parse_args()
     config = generate_config(args)
 
-    env = CityFlowEnvRay(config)
+    # env = CityFlowEnvRay(config)
     # eng = cityflow.Engine(config["cityflow_config_file"], thread_num = config["thread_num"])
     # config["eng"] = [eng,]
     # print(config["eng"])
@@ -91,7 +91,7 @@ def main():
             "num_cpus_per_worker": 30,
             "train_batch_size": 32,
             "exploration_final_eps": 0.0,
-            "num_workers": 1,
+            "num_workers": 0,
             "mixer": grid_search(["qmix"]),
             "env_config":config
         }
@@ -139,6 +139,7 @@ def main():
                 "training_iteration": 1
             },
             restore=args.ckpt,
+            resume=False,
             config=dict(config_,
             **{"env":"cityflow_multi"}),
         )

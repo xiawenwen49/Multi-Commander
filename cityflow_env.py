@@ -187,8 +187,9 @@ class CityFlowEnvM(object):
             self.start_lane[id_] = self.lane_phase_info[id_]['start_lane']
             self.end_lane[id_] = self.lane_phase_info[id_]['end_lane']
             self.phase_startLane_mapping[id_] = self.lane_phase_info[id_]["phase_startLane_mapping"]
-
             self.phase_list[id_] = self.lane_phase_info[id_]["phase"]
+
+            self.num_actions = len(self.phase_list[self.intersection_id[0]])
             self.current_phase[id_] = self.phase_list[id_][0]
             self.current_phase_time[id_] = 0
         self.get_state() # set self.state_size
@@ -211,14 +212,34 @@ class CityFlowEnvM(object):
         return self.get_state(), self.get_reward()
 
     def get_state(self):
-        state =  {id_: self.get_state_(id_) for id_ in self.intersection_id}
+        state =  {id_: self.get_state_(id_) for id_ in sorted(self.intersection_id)}
         return state
 
     def get_state_(self, id_):
+        # state = self.intersection_info(id_)
+        # state_dict = state['start_lane__vehicle_count']
+        # sorted_keys = sorted(state_dict.keys())
+        # return_state = [state_dict[key] for key in sorted_keys] + [state['current_phase']]
+        # return self.preprocess_state(return_state)
+
         state = self.intersection_info(id_)
-        state_dict = state['start_lane_waiting_vehicle_count']
-        sorted_keys = sorted(state_dict.keys())
-        return_state = [state_dict[key] for key in sorted_keys] + [state['current_phase']]
+        start_lane_vehicle_count = state['start_lane_vehicle_count']
+        start_lane_waiting_vehicle_count = state['start_lane_waiting_vehicle_count']
+        
+        phase_start_lane_vehicle_count = []
+        phase_start_lane_waiting_count = []
+
+        phase_startLane_mapping = self.phase_startLane_mapping[id_]
+        for i in range(self.num_actions): # each phase's startLane vehicle count
+            phase = self.phase_list[id_][i]
+            startLane_mapping = phase_startLane_mapping[phase] # ['road_0_1_0_1', 'road_0_1_0_2', ...]
+            phase_start_lane_vehicle_count.append( np.sum([start_lane_vehicle_count[startLane] for startLane in startLane_mapping]) )
+            phase_start_lane_waiting_count.append( np.sum([start_lane_waiting_vehicle_count[startLane] for startLane in startLane_mapping]))
+        phase_start_lane_vehicle_count = np.array(phase_start_lane_vehicle_count)
+        phase_start_lane_waiting_count = np.array(phase_start_lane_waiting_count) * 2
+
+        return_state = list(phase_start_lane_vehicle_count + phase_start_lane_waiting_count)
+        return_state = return_state + [state['current_phase']]
         return self.preprocess_state(return_state)
 
     def intersection_info(self, id_):
@@ -261,11 +282,11 @@ class CityFlowEnvM(object):
         return_state = np.array(state)
         if self.state_size is None:
             self.state_size = len(return_state.flatten())
-        return_state = np.reshape(return_state, [1, self.state_size])
+        return_state = np.reshape(return_state, [1, self.state_size]).flatten()
         return return_state
 
     def get_reward(self):
-        reward = {id_: self.get_reward_(id_) for id_ in self.intersection_id}
+        reward = {id_: self.get_reward_(id_) for id_ in sorted(self.intersection_id)}
         return reward
 
     # def get_reward_(self, id_):
@@ -306,7 +327,7 @@ class CityFlowEnvRay(MultiAgentEnv):
     '''
     multi inersection cityflow environment, for the Ray framework
     '''
-    observation_space = Box(0*np.ones((9,)), 100*np.ones((9,)))
+    observation_space = Box(0*np.ones((9,)), 200*np.ones((9,)))
     action_space = Discrete(8) # num of phases
 
     def __init__(self, config):
@@ -364,7 +385,8 @@ class CityFlowEnvRay(MultiAgentEnv):
         '''
         action: {intersection_id: phase, ...}
         '''
-        if self.count % 400 == 0:
+        temp = 2 if self.config["rollout"] else 50
+        if self.count % temp == 0:
             print("action:", action)
 
         for id_, a in action.items():
@@ -494,9 +516,9 @@ class CityFlowEnvRay(MultiAgentEnv):
 
     def get_reward(self):
         reward = {id_: self.get_reward_(id_) for id_ in self.intersection_id}
-        mean_global_sum = np.mean(list(reward.values()))
-        # return reward
-        reward = {id_:mean_global_sum for id_ in self.intersection_id}
+        # mean_global_sum = np.mean(list(reward.values()))
+        return reward
+        # reward = {id_:mean_global_sum for id_ in self.intersection_id}
         return reward
 
     def get_reward_(self, id_):

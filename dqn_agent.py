@@ -10,7 +10,7 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 import keras.backend.tensorflow_backend as KTF
 import tensorflow as tf
-from keras import initializer
+# from tensorflow.keras import initializer
 import os
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
@@ -45,9 +45,9 @@ class DQNAgent(object):
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(Dense(40, input_dim=self.state_size, activation='relu', kernel_initializer=initializer.glorot_uniform(seed=0)))
-        model.add(Dense(40, activation='relu', kernel_initializer=initializer.glorot_uniform(seed=0)))
-        model.add(Dense(self.action_size, activation='linear', kernel_initializer=initializer.glorot(seed=0)))
+        model.add(Dense(40, input_dim=self.state_size, activation='relu'))
+        model.add(Dense(40, activation='relu'))
+        model.add(Dense(self.action_size, activation='linear'))
         model.compile(loss='mse',
                       optimizer=Adam(lr=self.learning_rate))
         return model
@@ -70,15 +70,17 @@ class DQNAgent(object):
         '''
         choose phase with max waiting count in its start lanes
         '''
-        intersection_info = self.env.intersection_info(self.intersection_id)
-        phase_waiting_count = self.phase_list.copy()
-        for index, phase in enumerate(self.phase_list):
-            phase_start_lane = self.env.phase_startLane_mapping[self.intersection_id][phase] # {0:['road_0_1_1_1',], 1:[]...}
-            phase_start_lane_waiting_count = [intersection_info["start_lane_vehicle_count"][lane] for lane  in phase_start_lane] # [num1, num2, ...]
-            sum_count = sum(phase_start_lane_waiting_count)
-            phase_waiting_count[index] = sum_count
+        # intersection_info = self.env.intersection_info(self.intersection_id)
+        # phase_waiting_count = self.phase_list.copy()
+        # for index, phase in enumerate(self.phase_list):
+        #     phase_start_lane = self.env.phase_startLane_mapping[self.intersection_id][phase] # {0:['road_0_1_1_1',], 1:[]...}
+        #     phase_start_lane_waiting_count = [intersection_info["start_lane_vehicle_count"][lane] for lane  in phase_start_lane] # [num1, num2, ...]
+        #     sum_count = sum(phase_start_lane_waiting_count)
+        #     phase_waiting_count[index] = sum_count
         
-        action = np.argmax(phase_waiting_count)
+        # action = np.argmax(phase_waiting_count)
+        # return action
+        action = np.argmax(state[:-1])
         return action
 
     def replay(self):
