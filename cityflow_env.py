@@ -306,7 +306,7 @@ class CityFlowEnvRay(MultiAgentEnv):
     '''
     multi inersection cityflow environment, for the Ray framework
     '''
-    observation_space = Box(0*np.ones((9,)), 100*np.ones((9,)))
+    observation_space = Box(0*np.ones((9,)), 300*np.ones((9,)))
     action_space = Discrete(8) # num of phases
 
     def __init__(self, config):
@@ -364,7 +364,8 @@ class CityFlowEnvRay(MultiAgentEnv):
         '''
         action: {intersection_id: phase, ...}
         '''
-        if self.count % 400 == 0:
+        temp = 2 if self.config["rollout"] else 50
+        if self.count % temp == 0:
             print("action:", action)
 
         for id_, a in action.items():
@@ -393,22 +394,23 @@ class CityFlowEnvRay(MultiAgentEnv):
             for id_ in self.intersection_id:
                 if self.congestion[id_]:
                     self.done[id_] = True
-                    # reward[id_] = -1*50*(self.num_step-self.count) # if congestion, return a large penaty
-                    reward[id_] = -50
+                    reward[id_] = -1*30*(self.num_step-self.count) # if congestion, return a large penaty
+                    #reward[id_] = -100
             if all(list(self.congestion.values())) is True:
+            #if any(list(self.congestion.values())) is True:
                 self.done['__all__'] = True
             else:
                 self.done['__all__'] = False
 
         # for rollout ######
-        if self.config["rollout"]:
-            reward = self.get_reward()
-            if self.count >= self.num_step:
-                self.done = {id_:True for id_ in self.intersection_id}
-                self.done['__all__'] = True
-            else:
-                self.done = {id_:False for id_ in self.intersection_id}
-                self.done['__all__'] = False
+#        if self.config["rollout"]:
+#            reward = self.get_reward()
+#            if self.count >= self.num_step:
+#                self.done = {id_:True for id_ in self.intersection_id}
+#                self.done['__all__'] = True
+#            else:
+#                self.done = {id_:False for id_ in self.intersection_id}
+#                self.done['__all__'] = False
             
         # for rollout ######
         return state, reward, self.done, {} 
@@ -424,7 +426,7 @@ class CityFlowEnvRay(MultiAgentEnv):
         return congestion
 
     def get_state(self):
-        state =  {id_: self.get_state_(id_) for id_ in self.intersection_id}
+        state =  {id_: self.get_state_(id_) for id_ in sorted(self.intersection_id)}
         return state
 
     def get_state_(self, id_):
@@ -493,11 +495,11 @@ class CityFlowEnvRay(MultiAgentEnv):
         return return_state
 
     def get_reward(self):
-        reward = {id_: self.get_reward_(id_) for id_ in self.intersection_id}
-        mean_global_sum = np.mean(list(reward.values()))
-        # return reward
-        reward = {id_:mean_global_sum for id_ in self.intersection_id}
+        reward = {id_: self.get_reward_(id_) for id_ in sorted(self.intersection_id)}
+        # mean_global_sum = np.mean(list(reward.values()))
         return reward
+        # reward = {id_:mean_global_sum for id_ in self.intersection_id}
+        # return reward
 
     def get_reward_(self, id_):
         '''
