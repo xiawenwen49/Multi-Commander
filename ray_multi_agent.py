@@ -28,10 +28,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--config', type=str, default='/home/{}/workspace/Multi-Commander/config/global_config_multi.json'.format(USERNAME), help='config file')
 parser.add_argument('--algo', type=str, default='QMIX', choices=['QMIX', 'APEX_QMIX'],
                     help='choose an algorithm')
-parser.add_argument('--rollout', type=bool, default=True, help='rollout a policy')
+parser.add_argument('--rollout', type=bool, default=False, help='rollout a policy')
 parser.add_argument('--ckpt', type=str, default=r'/home/{}/ray_results/QMIX/QMIX_cityflow_multi_0_mixer=qmix_2019-08-09_13-14-1143atx77h/checkpoint_800/checkpoint-800'.format(USERNAME), help='checkpoint')
 parser.add_argument('--epoch', type=int, default=1000, help='number of training epochs')
-parser.add_argument('--num_step', type=int, default=350,help='number of timesteps for one episode, and for inference')
+parser.add_argument('--num_step', type=int, default=250,help='number of timesteps for one episode, and for inference')
 parser.add_argument('--save_freq', type=int, default=50, help='model saving frequency')
 parser.add_argument('--batch_size', type=int, default=32, help='model saving frequency')
 parser.add_argument('--phase_time', type=int, default=15, help='consistancy time of one phase')
@@ -88,13 +88,20 @@ def main():
     if args.algo == "QMIX":
         config_ = {
             # "num_workers": 2,
-            "num_gpus_per_worker":1,
+            "num_gpus_per_worker":0,
             "sample_batch_size": 4,
             "num_cpus_per_worker": 30,
-            "train_batch_size": 32,
+            "train_batch_size": 3,
             "exploration_final_eps": 0.0,
-            "num_workers": 0,
-            "mixer": grid_search(["qmix"]),
+            "num_workers": 1,
+            "mixer": grid_search(["vdn"]), # "qmix"
+            "double_q": True,
+            "exploration_fraction": 0.1,
+            "exploration_final_eps": 0.2,
+            "target_network_update_freq": 500,
+            "buffer_size": 10000,
+            "learning_starts": 500,
+            "lr": 0.0005,
             "env_config":config
         }
         group = True
