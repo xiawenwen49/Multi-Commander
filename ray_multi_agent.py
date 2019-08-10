@@ -28,12 +28,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--config', type=str, default='/home/{}/workspace/Multi-Commander/config/global_config_multi.json'.format(USERNAME), help='config file')
 parser.add_argument('--algo', type=str, default='QMIX', choices=['QMIX', 'APEX_QMIX'],
                     help='choose an algorithm')
-parser.add_argument('--rollout', type=bool, default=False, help='rollout a policy')
-parser.add_argument('--ckpt', type=str, default=r'/home/{}/ray_results/QMIX/QMIX_cityflow_multi_0_mixer=qmix_2019-08-09_02-48-52wfilvlwu/checkpoint-300/checkpoint-300'.format(USERNAME), help='checkpoint')
+parser.add_argument('--rollout', type=bool, default=True, help='rollout a policy')
+parser.add_argument('--ckpt', type=str, default=r'/home/{}/ray_results/QMIX/QMIX_cityflow_multi_0_mixer=qmix_2019-08-09_13-14-1143atx77h/checkpoint_800/checkpoint-800'.format(USERNAME), help='checkpoint')
 parser.add_argument('--epoch', type=int, default=1000, help='number of training epochs')
-parser.add_argument('--num_step', type=int, default=1000,help='number of timesteps for one episode, and for inference')
+parser.add_argument('--num_step', type=int, default=350,help='number of timesteps for one episode, and for inference')
 parser.add_argument('--save_freq', type=int, default=50, help='model saving frequency')
 parser.add_argument('--batch_size', type=int, default=32, help='model saving frequency')
+parser.add_argument('--phase_time', type=int, default=15, help='consistancy time of one phase')
 parser.add_argument('--state_time_span', type=int, default=5, help='state interval to receive long term state')
 parser.add_argument('--time_span', type=int, default=30, help='time interval to collect data')
 
@@ -55,6 +56,7 @@ def generate_config(args):
     config["state_time_span"] = args.state_time_span
     config["time_span"] = args.time_span
     config["rollout"] = args.rollout
+    config["phase_time"] = args.phase_time
     # phase_list = config['lane_phase_info'][intersection_id]['phase']
     # logging.info(phase_list)
     # config["state_size"] = len(config['lane_phase_info'][intersection_id]['start_lane']) + 1 # 1 is for the current phase. [vehicle_count for each start lane] + [current_phase]
@@ -135,8 +137,8 @@ def main():
         tune.run(
             args.algo,
             stop={
-                "timesteps_total":args.num_step,
-                "training_iteration": 1
+                "timesteps_total":3000,
+                "training_iteration": 0
             },
             restore=args.ckpt,
             resume=False,
