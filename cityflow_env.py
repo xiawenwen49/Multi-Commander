@@ -385,7 +385,7 @@ class CityFlowEnvRay(MultiAgentEnv):
         '''
         action: {intersection_id: phase, ...}
         '''
-        temp = 1 if self.config["rollout"] else 50
+        temp = 1 if self.config["rollout"] else 100
         if self.count % temp == 0:
             print("action:", action)
 
@@ -413,17 +413,17 @@ class CityFlowEnvRay(MultiAgentEnv):
             self.done['__all__'] = True
             # for id_ in self.intersection_id:
             #     reward[id_] = 0
-        else:
-            for id_ in self.intersection_id:
-                if self.congestion[id_]:
-                    self.done[id_] = True
-                    reward[id_] = -1*50*(self.num_step-self.count) # if congestion, return a large penaty
-                    # reward[id_] = -100
-            if all(list(self.congestion.values())) is True:
-            #if any(list(self.congestion.values())) is True:
-                self.done['__all__'] = True
-            else:
-                self.done['__all__'] = False
+        # else:
+            # for id_ in self.intersection_id:
+            #     if self.congestion[id_]:
+            #         self.done[id_] = True
+            #         reward[id_] = -1*50*(self.num_step-self.count) # if congestion, return a large penaty
+            #         # reward[id_] = -100
+            # if all(list(self.congestion.values())) is True:
+            #     self.done['__all__'] = True
+            # else:
+            #     self.done['__all__'] = False
+            
 
         # for rollout ######
 #        if self.config["rollout"]:
