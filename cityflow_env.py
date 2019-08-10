@@ -385,19 +385,21 @@ class CityFlowEnvRay(MultiAgentEnv):
         '''
         action: {intersection_id: phase, ...}
         '''
-        temp = 2 if self.config["rollout"] else 50
+        temp = 1 if self.config["rollout"] else 50
         if self.count % temp == 0:
             print("action:", action)
 
-        for id_, a in action.items():
-            if self.current_phase[id_] == self.phase_list[id_][a]:
-                self.current_phase_time[id_] += 1
-            else:
-                self.current_phase[id_] = self.phase_list[id_][a]
-                self.current_phase_time[id_] = 1
-            self.eng.set_tl_phase(id_, self.current_phase[id_]) # set phase of traffic light
-        # print("after action:", action)
-        self.eng.next_step()
+        for phase_i in range(self.config["phase_time"]):
+            for id_, a in action.items():
+                if self.current_phase[id_] == self.phase_list[id_][a]:
+                    self.current_phase_time[id_] += 1
+                else:
+                    self.current_phase[id_] = self.phase_list[id_][a]
+                    self.current_phase_time[id_] = 1
+                self.eng.set_tl_phase(id_, self.current_phase[id_]) # set phase of traffic light
+            # print("after action:", action)
+            self.eng.next_step()
+
         self.count += 1
 
         state = self.get_state()
@@ -415,8 +417,8 @@ class CityFlowEnvRay(MultiAgentEnv):
             for id_ in self.intersection_id:
                 if self.congestion[id_]:
                     self.done[id_] = True
-                    reward[id_] = -1*30*(self.num_step-self.count) # if congestion, return a large penaty
-                    #reward[id_] = -100
+                    reward[id_] = -1*50*(self.num_step-self.count) # if congestion, return a large penaty
+                    # reward[id_] = -100
             if all(list(self.congestion.values())) is True:
             #if any(list(self.congestion.values())) is True:
                 self.done['__all__'] = True
