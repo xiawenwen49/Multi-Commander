@@ -75,7 +75,7 @@ python run_rl_multi_control.py --algo MDQN --epoch 1 --num_step 1 --phase_step 1
 
 Generate replay file
 ```
-python run_rl_multi_control.py --algo MDQN --inference --num_step 500 --phase_step 10 --ckpt model/MDQN_20190809_134734/MDQN-1.h5
+python run_rl_multi_control.py --algo MDQN --inference --num_step 130 --phase_step 30 --ckpt model/MDQN_20190809_134734/MDQN-1.h5
 ```
 
 
