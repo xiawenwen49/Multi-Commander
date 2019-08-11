@@ -57,12 +57,23 @@ python ray_multi_agent.py
 python run_rl_multi_control.py --algo MDQN --epoch 1000 --num_step 500 --phase_step 10
 ```
 
+*MDQN-based on Ray*
+```
+python ray_multi_dqn.py
+```
+
 **Inference**
 
 *MDQN*
 ```
 python run_rl_multi_control.py --algo MDQN --inference --num_step 1500 --phase_step 15 --ckpt model/XXXXXXX/MDQN-1.h5
 ```
+
+*MDQN-based on Ray*
+```
+python ray_multi_dqn_rollout.py --run DQN ~/ray_results/DQN_cityflow_multi_2019-08-11_00-44-52khzt8bnq/checkpoint_400/checkpoint-400 --env cityflow_multi --steps 1000
+```
+
 
 
 #### Rule based
