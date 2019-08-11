@@ -327,7 +327,7 @@ class CityFlowEnvRay(MultiAgentEnv):
     '''
     multi inersection cityflow environment, for the Ray framework
     '''
-    observation_space = Box(0*np.ones((9,)), 200*np.ones((9,)))
+    observation_space = Box(0*np.ones((9,)), 300*np.ones((9,)))
     action_space = Discrete(8) # num of phases
 
     def __init__(self, config):
@@ -342,7 +342,7 @@ class CityFlowEnvRay(MultiAgentEnv):
         self.state_size = None
         
         self.lane_phase_info = config["lane_phase_info"] # "intersection_1_1"
-        self.congestion_thres = 30
+        self.congestion_thres = 30 # 30 -> episode length will change
 
         self.current_phase = {}
         self.current_phase_time = {}
@@ -426,14 +426,14 @@ class CityFlowEnvRay(MultiAgentEnv):
             
 
         # for rollout ######
-        if self.config["rollout"]:
-            reward = self.get_reward()
-            if self.count >= self.num_step:
-                self.done = {id_:True for id_ in self.intersection_id}
-                self.done['__all__'] = True
-            else:
-                self.done = {id_:False for id_ in self.intersection_id}
-                self.done['__all__'] = False
+#        if self.config["rollout"]:
+#            reward = self.get_reward()
+#            if self.count >= self.num_step:
+#                self.done = {id_:True for id_ in self.intersection_id}
+#                self.done['__all__'] = True
+#            else:
+#                self.done = {id_:False for id_ in self.intersection_id}
+#                self.done['__all__'] = False
             
         # for rollout ######
         return state, reward, self.done, {} 
@@ -449,7 +449,7 @@ class CityFlowEnvRay(MultiAgentEnv):
         return congestion
 
     def get_state(self):
-        state =  {id_: self.get_state_(id_) for id_ in self.intersection_id}
+        state =  {id_: self.get_state_(id_) for id_ in sorted(self.intersection_id)}
         return state
 
     def get_state_(self, id_):

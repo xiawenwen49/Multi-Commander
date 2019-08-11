@@ -91,10 +91,17 @@ def main():
             "num_gpus_per_worker":0,
             "sample_batch_size": 4,
             "num_cpus_per_worker": 30,
-            "train_batch_size": 32,
+            "train_batch_size": 3,
             "exploration_final_eps": 0.0,
-            "num_workers": 0,
-            "mixer": grid_search(["qmix"]),
+            "num_workers": 1,
+            "mixer": grid_search(["vdn"]), # "qmix"
+            "double_q": True,
+            "exploration_fraction": 0.1,
+            "exploration_final_eps": 0.2,
+            "target_network_update_freq": 500,
+            "buffer_size": 10000,
+            "learning_starts": 500,
+            "lr": 0.0005,
             "env_config":config
         }
         group = True
