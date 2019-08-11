@@ -24,7 +24,7 @@ def main():
     date = datetime.now().strftime('%Y%m%d_%H%M%S')
     parser = argparse.ArgumentParser()
     # parser.add_argument('--scenario', type=str, default='PongNoFrameskip-v4')
-    parser.add_argument('--config', type=str, default='/home/leaves/workspace/Multi-Commander/config/global_config_multi.json', help='config file')
+    parser.add_argument('--config', type=str, default='/home/leaves/workspace/Multi-Commander/config/global_config.json', help='config file')
     parser.add_argument('--algo', type=str, default='MDQN', choices=['MDQN',], help='choose an algorithm')
     parser.add_argument('--inference', action="store_true", help='inference or training')
     parser.add_argument('--ckpt', type=str, help='inference or training')
