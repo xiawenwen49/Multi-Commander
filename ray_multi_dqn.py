@@ -121,6 +121,8 @@ if __name__ == "__main__":
             },
             "gamma": 0.95,
             "n_step": 3,
+            "num_workers":1,
+            "num_cpus_per_worker":20,
             "env_config":config
         })
 
