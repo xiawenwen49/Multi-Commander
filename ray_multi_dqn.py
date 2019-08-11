@@ -98,19 +98,7 @@ if __name__ == "__main__":
         #     return "dqn_policy"
         return agent_id
 
-    # ppo_trainer = PPOTrainer(
-    #     env="multi_cartpole",
-    #     config={
-    #         "multiagent": {
-    #             "policies": policies,
-    #             "policy_mapping_fn": policy_mapping_fn,
-    #             "policies_to_train": ["ppo_policy"],
-    #         },
-    #         # disable filters, otherwise we would need to synchronize those
-    #         # as well to the DQN agent
-    #         "observation_filter": "NoFilter",
-    #     })
-
+    
     dqn_trainer = DQNTrainer(
         env="cityflow_multi",
         config={
@@ -124,16 +112,6 @@ if __name__ == "__main__":
             "env_config":config
         })
 
-    # disable DQN exploration when used by the PPO trainer
-    # ppo_trainer.workers.foreach_worker(
-    #     lambda ev: ev.for_policy(
-    #         lambda pi: pi.set_epsilon(0.0), policy_id="dqn_policy"))
-
-    # You should see both the printed X and Y approach 200 as this trains:
-    # info:
-    #   policy_reward_mean:
-    #     dqn_policy: X
-    #     ppo_policy: Y
     for i in range(args.epoch):
         print("== Iteration", i, "==")
 
@@ -144,11 +122,3 @@ if __name__ == "__main__":
         if (i+1) % 100 == 0:
             checkpoint = dqn_trainer.save()
             print("checkpoint saved at", checkpoint)
-
-        # improve the PPO policy
-        # print("-- PPO --")
-        # print(pretty_print(ppo_trainer.train()))
-
-        # swap weights to synchronize
-        # dqn_trainer.set_weights(ppo_trainer.get_weights(["ppo_policy"]))
-        # ppo_trainer.set_weights(dqn_trainer.get_weights(["dqn_policy"]))

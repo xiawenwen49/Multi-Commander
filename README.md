@@ -1,5 +1,5 @@
 # Multi-Commander
-Multi-agent signal control
+Multi-agent traffic signal control for DeeCamp2019
 
 ## usage
 ### Single agent for single intersection
