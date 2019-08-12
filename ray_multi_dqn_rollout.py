@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 from __future__ import absolute_import
 from __future__ import division
@@ -45,7 +44,7 @@ def create_parser(parser_creator=None):
         epilog=EXAMPLE_USAGE)
 
     parser.add_argument(
-        "checkpoint", type=str, help="Checkpoint from which to roll out.")
+        "--checkpoint", type=str, help="Checkpoint from which to roll out.")
     required_named = parser.add_argument_group("required named arguments")
     required_named.add_argument(
         "--run",

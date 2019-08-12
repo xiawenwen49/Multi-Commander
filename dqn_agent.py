@@ -4,14 +4,17 @@ DQN and Double DQN agent implementation using Keras
 
 import random
 import numpy as np
+import keras
 from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
+from keras.callbacks import TensorBoard
 import keras.backend.tensorflow_backend as KTF
 import tensorflow as tf
 # from tensorflow.keras import initializer
 import os
+from datetime import datetime
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 # KTF.set_session(tf.Session(config=tf.ConfigProto(device_count={'gpu':0})))
@@ -23,6 +26,7 @@ class DQNAgent(object):
             action_size=8,
             batch_size=32,
             phase_list=[],
+            train=True,
             env=None
             ):
         self.env = env
@@ -32,24 +36,31 @@ class DQNAgent(object):
         self.memory = deque(maxlen=3000)
         self.gamma = 0.95    # discount rate
         self.epsilon = 1.0  # exploration rate
-        self.epsilon_min = 0.1
-        self.epsilon_decay = 0.9995
+        self.epsilon_min = 0.2
+        self.epsilon_decay = 0.999
         self.learning_rate = 0.001
         self.batch_size = batch_size
+        self.train = train
         self.model = self._build_model()
         self.target_model = self._build_model()
         self.update_target_network()
         
         self.phase_list = phase_list
 
+        self.logdir = "logs/scalars/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.tensorboard_callback = keras.callbacks.TensorBoard(log_dir=self.logdir)
+        
+
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
+        
         model = Sequential()
-        model.add(Dense(40, input_dim=self.state_size, activation='relu'))
-        model.add(Dense(40, activation='relu'))
+        model.add(Dense(128, input_dim=self.state_size, activation='relu'))
+        model.add(Dense(128, activation='relu'))
         model.add(Dense(self.action_size, activation='linear'))
         model.compile(loss='mse',
-                      optimizer=Adam(lr=self.learning_rate))
+                      optimizer=Adam(lr=self.learning_rate),
+                      )
         return model
 
     def update_target_network(self):
@@ -61,8 +72,9 @@ class DQNAgent(object):
         self.memory.append((state, action, reward, next_state))
 
     def choose_action(self, state):
-        if np.random.rand() <= self.epsilon:
-            return random.randrange(self.action_size)
+        if self.train:
+            if np.random.rand() <= self.epsilon:
+                return random.randrange(self.action_size)
         act_values = self.model.predict(state)
         return np.argmax(act_values[0])  # returns action
 
@@ -100,7 +112,7 @@ class DQNAgent(object):
         
         states = np.reshape(np.array(states), [-1, self.state_size])
         q_targets = np.reshape(np.array(q_targets), [-1, self.action_size])
-        self.model.fit(state, target_f, epochs=2, verbose=0) # batch training
+        self.model.fit(state, target_f, epochs=1, verbose=0) # batch training
 
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay

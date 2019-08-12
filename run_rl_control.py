@@ -9,7 +9,7 @@ import pandas as pd
 
 
 import cityflow
-from cityflow_env import CityFlowEnv
+from cityflow_env import CityFlowEnv, CityFlowEnvM
 # from test.cityflow_env import CityFlowEnv
 from utility import parse_roadnet, plot_data_lists
 from dqn_agent import DQNAgent, DDQNAgent
@@ -28,10 +28,10 @@ def main():
     parser.add_argument('--inference', action="store_true", help='inference or training')
     parser.add_argument('--ckpt', type=str, help='inference or training')
     parser.add_argument('--epoch', type=int, default=10, help='number of training epochs')
-    parser.add_argument('--num_step', type=int, default=200, help='number of timesteps for one episode, and for inference')
-    parser.add_argument('--save_freq', type=int, default=1, help='model saving frequency')
+    parser.add_argument('--num_step', type=int, default=350, help='number of timesteps for one episode, and for inference')
+    parser.add_argument('--save_freq', type=int, default=20, help='model saving frequency')
     parser.add_argument('--batch_size', type=int, default=64, help='batchsize for training')
-    parser.add_argument('--phase_step', type=int, default=15, help='seconds of one phase')
+    parser.add_argument('--phase_step', type=int, default=10, help='seconds of one phase')
     
     args = parser.parse_args()
 
@@ -40,7 +40,7 @@ def main():
     config = json.load(open(args.config))
     config["num_step"] = args.num_step
     
-    assert "1x1" in config['cityflow_config_file'], "please use 1x1 config file for cityflow"
+    assert "1_1" in config['cityflow_config_file'], "please use 1x1 config file for cityflow"
 
     # config["replay_data_path"] = "replay"
     cityflow_config = json.load(open(config['cityflow_config_file']))
@@ -120,7 +120,7 @@ def main():
                 episode_score = 0
                 while episode_length < args.num_step:
                     
-                    action = agent.choose_action_(state) # index of action
+                    action = agent.choose_action(state) # index of action
                     action_phase = phase_list[action] # actual action
                     # no yellow light
                     next_state, reward = env.step(action_phase) # one step

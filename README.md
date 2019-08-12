@@ -69,9 +69,9 @@ python ray_multi_dqn.py
 python run_rl_multi_control.py --algo MDQN --inference --num_step 1500 --phase_step 15 --ckpt model/XXXXXXX/MDQN-1.h5
 ```
 
-*MDQN (based on Ray)*
+*MDQN (based on Ray) (in lab linux)*
 ```
-python ray_multi_dqn_rollout.py --run DQN ~/ray_results/DQN_cityflow_multi_2019-08-11_00-44-52khzt8bnq/checkpoint_400/checkpoint-400 --env cityflow_multi --steps 1000
+python ray_multi_dqn_rollout.py --run DQN --checkpoint ~/ray_results/DQN_cityflow_multi_2019-08-11_00-44-52khzt8bnq/checkpoint_400/checkpoint-400 --env cityflow_multi --steps 1000
 ```
 
 
@@ -98,8 +98,12 @@ open firefox with the url: http://localhost:8080/?roadnetFile=roadnet.json&logFi
 ```
 
 
-
-
+#### Installation
+*Ciryflow deecamp branch*
+```
+git clone -b deecamp https://github.com/zhc134/CityFlow.git
+pip install .
+```
 
 ---
 

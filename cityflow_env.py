@@ -5,6 +5,7 @@ import json
 import math
 import numpy as np
 import itertools
+
 # from sim_setting import sim_setting_control
 
 class CityFlowEnv(object):
@@ -22,6 +23,9 @@ class CityFlowEnv(object):
         self.state_size = None
         self.lane_phase_info = lane_phase_info # "intersection_1_1"
         self.intersection_id = intersection_id
+
+        
+
         self.start_lane = self.lane_phase_info[self.intersection_id]['start_lane']
         self.end_lane = self.lane_phase_info[self.intersection_id]['end_lane']
 
@@ -29,8 +33,8 @@ class CityFlowEnv(object):
         self.phase_startLane_mapping = self.lane_phase_info[self.intersection_id]["phase_startLane_mapping"]
 
         self.replay_data_path = replay_data_path
-        self.current_phase = {self.intersection_id:self.phase_list[0]}
-        self.current_phase_time = {self.intersection_id:0}
+        self.current_phase = self.phase_list[0]
+        self.current_phase_time = 0
         self.yellow_time = 5
         self.state_store_i = 0
         self.get_state() # set self.state_size
@@ -40,21 +44,21 @@ class CityFlowEnv(object):
         self.eng.reset()
 
     def step(self, next_phase):
-        if self.current_phase[self.intersection_id] == next_phase:
-            self.current_phase_time[self.intersection_id] += 1
+        if self.current_phase == next_phase:
+            self.current_phase_time += 1
         else:
-            self.current_phase[self.intersection_id] = next_phase
-            self.current_phase_time[self.intersection_id] = 1
+            self.current_phase = next_phase
+            self.current_phase_time = 1
 
-        self.eng.set_tl_phase(self.intersection_id, self.current_phase[self.intersection_id]) # set phase of traffic light
+        self.eng.set_tl_phase(self.intersection_id, self.current_phase) # set phase of traffic light
         self.eng.next_step()
-        self.phase_log.append(self.current_phase[self.intersection_id])
+        self.phase_log.append(self.current_phase)
         return self.get_state(), self.get_reward() # return next_state and reward
 
     def get_state(self):
-        intersection_info = self.intersection_info(self.intersection_id)
+        intersection_info = self.intersection_info()
         state_dict = intersection_info['start_lane_vehicle_count']
-        return_state = [state_dict[key] for key in sorted(state_dict.keys())] + [intersection_info['current_phase'][self.intersection_id]]
+        return_state = [state_dict[key] for key in sorted(state_dict.keys())] + [intersection_info['current_phase']]
         return self.preprocess_state(return_state)
 
     def preprocess_state(self, state):
@@ -64,7 +68,7 @@ class CityFlowEnv(object):
         return_state = np.reshape(return_state, [1, self.state_size])
         return return_state
 
-    def intersection_info(self, id_):
+    def intersection_info(self):
         '''
         info of intersection 'id_'
         '''
@@ -74,20 +78,21 @@ class CityFlowEnv(object):
         get_lane_vehicles = self.eng.get_lane_vehicles()
         vehicle_speed = self.eng.get_vehicle_speed()
 
-        state['start_lane_vehicle_count'] = {lane: get_lane_vehicle_count[lane] for lane in self.start_lane[id_]}
-        state['end_lane_vehicle_count'] = {lane: get_lane_vehicle_count[lane] for lane in self.end_lane[id_]}
+        # print(get_lane_vehicle_count)
+        state['start_lane_vehicle_count'] = {lane: get_lane_vehicle_count[lane] for lane in self.start_lane}
+        state['end_lane_vehicle_count'] = {lane: get_lane_vehicle_count[lane] for lane in self.end_lane}
         
-        state['start_lane_waiting_vehicle_count'] = {lane: get_lane_waiting_vehicle_count[lane] for lane in self.start_lane[id_]}
-        state['end_lane_waiting_vehicle_count'] = {lane: get_lane_waiting_vehicle_count[lane] for lane in self.end_lane[id_]}
+        state['start_lane_waiting_vehicle_count'] = {lane: get_lane_waiting_vehicle_count[lane] for lane in self.start_lane}
+        state['end_lane_waiting_vehicle_count'] = {lane: get_lane_waiting_vehicle_count[lane] for lane in self.end_lane}
         
-        state['start_lane_vehicles'] = {lane: get_lane_vehicles[lane] for lane in self.start_lane[id_]}
-        state['end_lane_vehicles'] = {lane: get_lane_vehicles[lane] for lane in self.end_lane[id_]}
+        state['start_lane_vehicles'] = {lane: get_lane_vehicles[lane] for lane in self.start_lane}
+        state['end_lane_vehicles'] = {lane: get_lane_vehicles[lane] for lane in self.end_lane}
         
-        state['start_lane_speed'] = {lane: np.sum(list(map(lambda vehicle:vehicle_speed[vehicle], get_lane_vehicles[lane]))) / (get_lane_vehicle_count[lane]+1e-5) for lane in self.start_lane[id_]} # compute start lane mean speed
-        state['end_lane_speed'] = {lane: np.sum(list(map(lambda vehicle:vehicle_speed[vehicle], get_lane_vehicles[lane]))) / (get_lane_vehicle_count[lane]+1e-5) for lane in self.end_lane[id_]} # compute end lane mean speed
+        state['start_lane_speed'] = {lane: np.sum(list(map(lambda vehicle:vehicle_speed[vehicle], get_lane_vehicles[lane]))) / (get_lane_vehicle_count[lane]+1e-5) for lane in self.start_lane} # compute start lane mean speed
+        state['end_lane_speed'] = {lane: np.sum(list(map(lambda vehicle:vehicle_speed[vehicle], get_lane_vehicles[lane]))) / (get_lane_vehicle_count[lane]+1e-5) for lane in self.end_lane} # compute end lane mean speed
         
-        state['current_phase'] = self.current_phase[id_]
-        state['current_phase_time'] = self.current_phase_time[id_]
+        state['current_phase'] = self.current_phase
+        state['current_phase_time'] = self.current_phase_time
 
         return state
 
@@ -109,28 +114,26 @@ class CityFlowEnv(object):
     #     reward = -1 * np.mean(list(start_lane_vehicle_count.values()))
     #     return reward
 
-    # def get_reward(self):
-    #     '''
-    #     max waiting vehicle count of the lanes, *-1
-    #     '''
-    #     lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()
-    #     lane_waiting_vehicle_count_list = list(lane_waiting_vehicle_count.values())
-    #     reward = -1 * ( sum(lane_waiting_vehicle_count_list)/len(lane_waiting_vehicle_count_list)  )
-    #     return reward
-    
     def get_reward(self):
         '''
-        mean speed of start lanes
+        mean waiting vehicle count of the lanes, *-1
         '''
-        intersection_info = self.intersection_info(self.intersection_id)
-
-        start_lane_vehicles = intersection_info["start_lane_vehicle_count"]
-
-        start_lane_vehicles = list(itertools.chain(*start_lane_vehicles))
-        vehicle_speed = self.eng.get_vehicle_speed()
-        start_lane_vehicles_speed = [vehicle_speed[v] for v in start_lane_vehicles]
-        reward = sum(start_lane_vehicles_speed)/(len(start_lane_vehicles_speed) + 1e-5) * 100
+        lane_waiting_vehicle_count = self.eng.get_lane_waiting_vehicle_count()
+        lane_waiting_vehicle_count_list = list(lane_waiting_vehicle_count.values())
+        reward = -1 * sum(lane_waiting_vehicle_count_list)/ (len(lane_waiting_vehicle_count_list) + 1e-5)
         return reward
+    
+    # def get_reward(self):
+    #     '''
+    #     mean speed of start lanes
+    #     '''
+    #     intersection_info = self.intersection_info(self.intersection_id)
+    #     start_lane_vehicles = intersection_info["start_lane_vehicle_count"]
+    #     start_lane_vehicles = list(itertools.chain(*start_lane_vehicles))
+    #     vehicle_speed = self.eng.get_vehicle_speed()
+    #     start_lane_vehicles_speed = [vehicle_speed[v] for v in start_lane_vehicles]
+    #     reward = sum(start_lane_vehicles_speed)/(len(start_lane_vehicles_speed) + 1e-5) * 100
+    #     return reward
     
     def _get_pressure(self):
         return [self.dic_lane_waiting_vehicle_count_current_step[lane] for lane in self.list_entering_lanes] + \
@@ -289,23 +292,23 @@ class CityFlowEnvM(object):
         reward = {id_: self.get_reward_(id_) for id_ in sorted(self.intersection_id)}
         return reward
 
-    # def get_reward_(self, id_):
-    #     '''
-    #     every agent/intersection's reward
-    #     '''
-    #     state = self.intersection_info(id_)
-    #     start_lane_waiting_vehicle_count = state['start_lane_waiting_vehicle_count']
-    #     reward = -1 * np.sum(list(start_lane_waiting_vehicle_count.values()))
-    #     return reward
-
     def get_reward_(self, id_):
         '''
         every agent/intersection's reward
         '''
         state = self.intersection_info(id_)
-        start_lane_speed = state['start_lane_speed']
-        reward = np.mean(list(start_lane_speed.values())) * 100
+        start_lane_waiting_vehicle_count = state['start_lane_waiting_vehicle_count']
+        reward = -1 * np.mean(list(start_lane_waiting_vehicle_count.values()))
         return reward
+
+    # def get_reward_(self, id_):
+    #     '''
+    #     every agent/intersection's reward
+    #     '''
+    #     state = self.intersection_info(id_)
+    #     start_lane_speed = state['start_lane_speed']
+    #     reward = np.mean(list(start_lane_speed.values())) * 100
+    #     return reward
 
     def get_score(self):
         score = {id_: self.get_score_(id_) for id_ in self.intersection_id}
